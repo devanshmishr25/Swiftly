@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://swiftly-g3fg.onrender.com',
         changeOrigin: true
       },
       '/socket.io': {
-        target: 'http://localhost:5000',
+        target: 'https://swiftly-g3fg.onrender.com',
         ws: true,
         changeOrigin: true
       }
