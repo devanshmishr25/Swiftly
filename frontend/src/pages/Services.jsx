@@ -52,7 +52,7 @@ const Services = () => {
     setLoading(true);
     try {
       // Typically we fetch from DB here:
-      // const res = await axios.get(`http://localhost:5000/api/services?category=${selectedCategory}`);
+      // const res = await axios.get(`/api/services?category=${selectedCategory}`);
       
       // But since DB is mostly empty, we will locally filter our extremely rich daily-life service catalog!
       let filtered = DEFAULT_SERVICES;

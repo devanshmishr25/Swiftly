@@ -17,7 +17,7 @@ const ProviderReview = () => {
     const fetchProviderDetail = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const response = await axios.get(`http://localhost:5000/api/admin/users/${id}`, config);
+        const response = await axios.get(`/api/admin/users/${id}`, config);
         setProvider(response.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load provider details');
@@ -32,7 +32,7 @@ const ProviderReview = () => {
     if (!window.confirm('Are you sure you want to approve this professional?')) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`http://localhost:5000/api/admin/approve/${id}`, {}, config);
+      await axios.put(`/api/admin/approve/${id}`, {}, config);
       alert('Provider has been approved successfully!');
       navigate('/admin');
     } catch (err) {
@@ -44,7 +44,7 @@ const ProviderReview = () => {
     if (!window.confirm('Reject and delete this application?')) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, config);
+      await axios.delete(`/api/admin/users/${id}`, config);
       alert('Application rejected and account deleted.');
       navigate('/admin');
     } catch (err) {

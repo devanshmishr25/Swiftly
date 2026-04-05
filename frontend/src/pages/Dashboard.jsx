@@ -37,7 +37,7 @@ const Dashboard = () => {
     fetchData();
 
     // Socket.io initialization (Connect once on mount)
-    const socket = io('http://localhost:5000');
+    const socket = io('');
     
     if (storedUser.id || storedUser._id) {
       socketRef.current = socket;
@@ -87,7 +87,7 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get(`http://localhost:5000/api/messages/${booking._id}`, config);
+      const res = await axios.get(`/api/messages/${booking._id}`, config);
       setMessages(res.data);
     } catch (err) {
       console.error('Error fetching chat history:', err);
@@ -121,14 +121,14 @@ const Dashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       if (activeTab === 'settings') {
-        const res = await axios.get('http://localhost:5000/api/auth/me', config);
+        const res = await axios.get('/api/auth/me', config);
         setUser(res.data);
         setEditName(res.data.name);
         setEditPhone(res.data.phone || '');
         setEditLocation(res.data.location || '');
         setEditCategory(res.data.category || '');
       } else {
-        const res = await axios.get(`http://localhost:5000/api/bookings/my?role=${user.role}`, config);
+        const res = await axios.get(`/api/bookings/my?role=${user.role}`, config);
         setBookings(res.data);
       }
     } catch (err) {
@@ -146,7 +146,7 @@ const Dashboard = () => {
   const handleStatusUpdate = async (id, status) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`http://localhost:5000/api/bookings/${id}/status`, { status }, config);
+      await axios.put(`/api/bookings/${id}/status`, { status }, config);
       fetchData();
       if (status === 'accepted') toast.success('Job accepted successfully!');
       if (status === 'completed') toast.success('Job marked as completed!');
@@ -172,7 +172,7 @@ const Dashboard = () => {
         location: editLocation,
         category: editCategory
       };
-      const res = await axios.put('http://localhost:5000/api/auth/profile', payload, config);
+      const res = await axios.put('/api/auth/profile', payload, config);
       
       setUser(res.data);
       localStorage.setItem('swiftly_user', JSON.stringify(res.data));

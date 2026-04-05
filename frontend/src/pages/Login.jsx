@@ -18,7 +18,7 @@ const Login = () => {
       : { phone: identifier.trim(), password };
       
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', body);
+      const response = await axios.post('/api/auth/login', body);
       console.log('Login success:', response.data);
       // Store token and user data
       localStorage.setItem('swiftly_token', response.data.token);

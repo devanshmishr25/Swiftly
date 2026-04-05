@@ -25,8 +25,8 @@ const AdminDashboard = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const [statsRes, usersRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/admin/stats', config),
-        axios.get('http://localhost:5000/api/admin/users', config)
+        axios.get('/api/admin/stats', config),
+        axios.get('/api/admin/users', config)
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
@@ -44,7 +44,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Are you absolutely sure you want to delete ${name}? This will remove all their data forever.`)) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, config);
+      await axios.delete(`/api/admin/users/${id}`, config);
       setUsers(users.filter(u => u._id !== id));
       fetchAdminData(); // Refresh stats after deletion
     } catch (err) {
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Are you sure you want to clear all bookings and chat history for ${name}?`)) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}/bookings`, config);
+      await axios.delete(`/api/admin/users/${id}/bookings`, config);
       fetchAdminData();
       alert(`Successfully cleared all bookings for ${name}.`);
     } catch (err) {

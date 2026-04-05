@@ -108,7 +108,7 @@ const Providers = () => {
   const fetchProviders = async (cat) => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/services?category=${cat}`);
+      const res = await axios.get(`/api/services?category=${cat}`);
       setProviders(res.data);
     } catch (err) {
       console.error('Failed to fetch providers:', err);
@@ -143,7 +143,7 @@ const Providers = () => {
       };
       
       console.log('Sending Booking Payload:', payload);
-      await axios.post('http://localhost:5000/api/bookings', payload, config);
+      await axios.post('/api/bookings', payload, config);
       alert('Booking request sent successfully!');
       setSelectedProv(null);
       navigate('/dashboard');

@@ -22,7 +22,7 @@ const Message = require('./models/Message');
 // Socket connection logic
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
-  
+
   socket.on('join', (userId) => {
     socket.join(userId);
     console.log(`User ${userId} joined room.`);

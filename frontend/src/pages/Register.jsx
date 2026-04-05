@@ -57,7 +57,7 @@ const Register = () => {
     setError('');
     try {
       const payload = { name, email, password, role, phone, location, category };
-      const response = await axios.post('http://localhost:5000/api/auth/register', payload);
+      const response = await axios.post('/api/auth/register', payload);
       console.log('Registration success:', response.data);
       navigate('/login');
     } catch (err) {

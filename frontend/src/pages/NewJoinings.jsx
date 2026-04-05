@@ -20,7 +20,7 @@ const NewJoinings = () => {
     setLoading(true);
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get('http://localhost:5000/api/admin/pending', config);
+      const response = await axios.get('/api/admin/pending', config);
       setPendingUsers(response.data);
     } catch (err) {
       console.error('Failed to fetch pending joinings:', err);
@@ -36,7 +36,7 @@ const NewJoinings = () => {
     if (!window.confirm(`Approve ${name} as a professional provider?`)) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`http://localhost:5000/api/admin/approve/${id}`, {}, config);
+      await axios.put(`/api/admin/approve/${id}`, {}, config);
       setPendingUsers(pendingUsers.filter(u => u._id !== id));
       alert(`${name} is now live!`);
     } catch (err) {
@@ -48,7 +48,7 @@ const NewJoinings = () => {
     if (!window.confirm(`Reject and delete ${name}'s application?`)) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, config);
+      await axios.delete(`/api/admin/users/${id}`, config);
       setPendingUsers(pendingUsers.filter(u => u._id !== id));
     } catch (err) {
       alert('Rejection failed: ' + (err.response?.data?.message || err.message));
