@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Health Check for Deployment Verification
-app.get('/api/auth/health', (req, res) => res.json({ version: '1.0.1', isPhoneOnly: true }));
+app.get('/api/auth/health', (req, res) => res.json({ version: '1.0.2', isPhoneOnly: false, timestamp: '2026-04-06T11:32:00Z' }));
 
 const server = http.createServer(app);
 const io = socketUtils.init(server);
