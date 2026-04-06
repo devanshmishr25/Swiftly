@@ -346,6 +346,14 @@ const Dashboard = () => {
                               >
                                 <MessageSquare size={16} /> Message
                               </button>
+                              <a 
+                                href={`tel:${user.role === 'customer' ? booking.provider?.phone : booking.customer?.phone}`} 
+                                className="btn btn-ghost"
+                                style={{ width: '44px', height: '44px', padding: 0, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)' }}
+                                title="Call now"
+                              >
+                                <Phone size={20} />
+                              </a>
                             </div>
                           </div>
                         )}
@@ -423,19 +431,9 @@ const Dashboard = () => {
         <div className="chat-drawer-overlay" onClick={() => setActiveChat(null)}>
           <div className="chat-drawer" onClick={e => e.stopPropagation()}>
             <header className="chat-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <a 
-                  href={`tel:${user.role === 'customer' ? activeChat.provider?.phone : activeChat.customer?.phone}`} 
-                  className="btn btn-primary" 
-                  style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  title="Call now"
-                >
-                  <Phone size={18} />
-                </a>
-                <div>
-                  <h3 className="text-primary" style={{fontSize: '1.1rem'}}>{user.role === 'customer' ? activeChat.provider?.name : activeChat.customer?.name}</h3>
-                  <span className="text-secondary" style={{fontSize: '0.8rem'}}>{activeChat.service?.category} Request</span>
-                </div>
+              <div>
+                <h3 className="text-primary" style={{fontSize: '1.1rem'}}>{user.role === 'customer' ? activeChat.provider?.name : activeChat.customer?.name}</h3>
+                <span className="text-secondary" style={{fontSize: '0.8rem'}}>{activeChat.service?.category} Request</span>
               </div>
               <button className="btn-ghost" onClick={() => setActiveChat(null)}><X size={20} /></button>
             </header>
