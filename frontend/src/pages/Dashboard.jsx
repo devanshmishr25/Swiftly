@@ -34,6 +34,12 @@ const Dashboard = () => {
   const scrollRef = useRef();
 
   useEffect(() => {
+    // Security check: Redirect admin users away from this dashboard
+    if (storedUser.role === 'admin') {
+      window.location.href = '/admin';
+      return;
+    }
+
     fetchData();
 
     // Socket.io initialization (Connect once on mount)

@@ -24,7 +24,12 @@ const Login = () => {
       localStorage.setItem('swiftly_token', response.data.token);
       localStorage.setItem('swiftly_user', JSON.stringify(response.data.user));
       // Hard redirect to dashboard so Navbar updates
-      window.location.href = '/dashboard';
+      // Hard redirect based on role so Navbar updates
+      if (response.data.user?.role === 'admin') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/dashboard';
+      }
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Failed to login');
