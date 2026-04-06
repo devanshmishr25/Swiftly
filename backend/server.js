@@ -71,8 +71,36 @@ mongoose.connect(MONGO_URI)
     console.log('Connected to MongoDB');
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      seedAdmin();
     });
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
   });
+
+// Auto-Seed function for Super Admin
+const seedAdmin = async () => {
+  try {
+    const User = require('./models/User');
+    const bcrypt = require('bcryptjs');
+    
+    const adminExists = await User.findOne({ role: 'admin' });
+    if (!adminExists) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('Admin@123', salt);
+      
+      const admin = new User({
+        name: 'Super Admin',
+        phone: '+91 00000 00000',
+        password: hashedPassword,
+        role: 'admin',
+        isVerified: true // Admins are auto-verified
+      });
+      await admin.save();
+      console.log('✅ Super Admin account seeded successfully!');
+      console.log('Phone: +91 00000 00000 | Password: Admin@123');
+    }
+  } catch (err) {
+    console.warn('Admin Seeding Warning:', err.message);
+  }
+};
