@@ -5,7 +5,7 @@ import axios from 'axios';
 import './Auth.css';
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState('+91 ');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -35,6 +35,8 @@ const Login = () => {
         return;
       }
       setError(err.response?.data?.message || 'Failed to login');
+    } finally {
+      setLoading(false);
     }
   };
 

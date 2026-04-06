@@ -91,14 +91,14 @@ const seedAdmin = async () => {
       
       const admin = new User({
         name: 'Super Admin',
-        phone: '+91 00000 00000',
+        phone: '+910000000000', // Sanitized format (no spaces)
         password: hashedPassword,
         role: 'admin',
-        isVerified: true // Admins are auto-verified
+        isVerified: true
       });
       await admin.save();
       console.log('✅ Super Admin account seeded successfully!');
-      console.log('Phone: +91 00000 00000 | Password: Admin@123');
+      console.log('Phone: +91 00000 00000 (Use this in UI) | Password: Admin@123');
     }
   } catch (err) {
     console.warn('Admin Seeding Warning:', err.message);
