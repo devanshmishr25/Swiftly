@@ -29,7 +29,11 @@ exports.register = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Check if Firebase already verified this phone on the frontend
+    const isAutoVerified = req.body.isAutoVerified === true;
+    const otp = isAutoVerified ? null : Math.floor(100000 + Math.random() * 900000).toString();
+    
     const placeholderEmail = `user_${phone.replace('+', '')}@swiftly.local`;
 
     user = new User({
@@ -41,9 +45,9 @@ exports.register = async (req, res) => {
       location: location || "Not provided",
       category: role === 'provider' ? category : "",
       isApproved: role === 'provider' ? false : true,
-      isVerified: false,
+      isVerified: isAutoVerified, // Grant immediate access if verified by Firebase
       phoneOTP: otp,
-      phoneOTPExpires: Date.now() + 30 * 60 * 1000
+      phoneOTPExpires: isAutoVerified ? null : Date.now() + 30 * 60 * 1000
     });
 
     await user.save();
