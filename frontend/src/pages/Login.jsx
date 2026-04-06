@@ -62,7 +62,14 @@ const Login = () => {
                 className="input-field with-icon" 
                 placeholder="+91 00000 00000"
                 value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.startsWith('+91 ')) {
+                    setIdentifier(val);
+                  } else if (val === '' || val.length < 4) {
+                    setIdentifier('+91 ');
+                  }
+                }}
                 required 
               />
             </div>

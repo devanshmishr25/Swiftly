@@ -151,3 +151,21 @@
   color: var(--text-primary);
   padding: 12px;
 }
+.input-action-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.input-action-btn:hover {
+  color: var(--accent-primary);
+}

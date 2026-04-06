@@ -153,7 +153,14 @@ const Register = () => {
                   className="input-field with-icon" 
                   placeholder="+91 00000 00000"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val.startsWith('+91 ')) {
+                      setPhone(val);
+                    } else if (val === '' || val.length < 4) {
+                      setPhone('+91 ');
+                    }
+                  }}
                   required 
                 />
               </div>
