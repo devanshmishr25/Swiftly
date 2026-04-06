@@ -526,7 +526,7 @@
     width: 100%;
   }
   .stats-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr; /* Switch to single column stack */
     gap: 0.5rem;
   }
   .stat-card {
@@ -538,11 +538,33 @@
   .stat-card span {
     font-size: 0.7rem;
   }
-  .booking-footer .action-buttons {
-    gap: 6px;
+}
+
+@media (max-width: 444px) {
+  .booking-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
-  .booking-header h4 {
-    font-size: 0.9rem;
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  .action-buttons .btn, 
+  .action-buttons .btn-secondary, 
+  .action-buttons .btn-primary, 
+  .action-buttons .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+  /* For the specialized call-message-complete row */
+  .flex-row.gap-sm.w-full {
+     flex-direction: column;
+     gap: 8px;
+  }
+  .flex-row.gap-sm.w-full > * {
+     width: 100% !important;
+     justify-content: center !important;
   }
 }
 
