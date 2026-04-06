@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, Lock, ArrowRight, Phone } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ArrowRight, Phone } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
@@ -13,6 +13,7 @@ const Register = () => {
   const [category, setCategory] = useState('');
   const [role, setRole] = useState('customer');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
   const [userId, setUserId] = useState(null);
   const [otp, setOtp] = useState('');
@@ -163,13 +164,21 @@ const Register = () => {
               <div className="input-wrapper">
                 <Lock className="input-icon" size={20} />
                 <input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   className="input-field with-icon" 
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required 
                 />
+                <button 
+                  type="button" 
+                  className="input-action-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

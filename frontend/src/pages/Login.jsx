@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Phone, Lock, ArrowRight } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
@@ -8,6 +8,7 @@ const Login = () => {
   const [identifier, setIdentifier] = useState('+91 ');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -70,13 +71,21 @@ const Login = () => {
             <div className="input-wrapper">
               <Lock className="input-icon" size={20} />
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 className="input-field with-icon" 
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required 
               />
+              <button 
+                type="button" 
+                className="input-action-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
