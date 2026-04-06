@@ -6,10 +6,15 @@
   padding-top: 100px;
   min-height: 100vh;
   display: grid;
+  grid-auto-flow: row;
   grid-template-columns: var(--sidebar-width) 1fr;
   gap: var(--spacing-xl);
   padding-bottom: var(--spacing-3xl);
-  background: var(--bg-primary); /* Use global variable */
+  background: var(--bg-primary);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Sidebar */
@@ -485,86 +490,86 @@
 
 @media (max-width: 600px) {
   .dashboard-layout {
-    padding-top: 80px;
-    gap: 1rem;
+    padding: 80px 12px 2rem 12px;
+    grid-template-columns: 1fr;
+    width: 100%;
+    margin: 0;
+    overflow-x: hidden;
+  }
+  .dashboard-main {
+    padding-right: 0;
+    width: 100%;
+    min-width: 0;
   }
   .dashboard-sidebar {
-    padding: 0.75rem;
+    width: 100%;
+    margin: 0 0 1rem 0;
+    padding: 1rem;
+    box-sizing: border-box;
   }
   .profile-section {
-    padding-bottom: 0.75rem;
-    margin-bottom: 0.75rem;
+    flex-direction: row;
+    gap: 12px;
   }
-  .profile-avatar {
-    width: 44px;
-    height: 44px;
+  .dashboard-nav {
+    flex-direction: column;
+    gap: 8px;
   }
-  .profile-info h3 {
-    font-size: 1rem;
-  }
-  .dashboard-header h2 {
-    font-size: 1.5rem;
-  }
-  .booking-card {
-    padding: 0.75rem;
-  }
-  .booking-body-condensed {
-    padding: 8px;
-  }
-  .info-grid {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-  .action-buttons .btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 450px) {
-  .chat-drawer {
+  .nav-item {
     width: 100%;
+    padding: 12px;
   }
   .stats-row {
-    grid-template-columns: 1fr; /* Switch to single column stack */
-    gap: 0.5rem;
+    grid-template-columns: 1fr; /* ALWAYS stack on small mobile */
+    gap: 0.75rem;
   }
-  .stat-card {
-    padding: 0.75rem;
+  .dashboard-header h2 {
+    font-size: 1.4rem;
   }
-  .stat-card h3 {
-    font-size: 1.1rem;
+  .booking-card {
+    padding: 0.8rem;
+    width: 100%;
+    min-width: 0; /* Allow shrinking */
+    box-sizing: border-box;
   }
-  .stat-card span {
-    font-size: 0.7rem;
-  }
-}
-
-@media (max-width: 444px) {
   .booking-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
+  .booking-footer {
+    justify-content: flex-start; /* Don't push to right */
+    width: 100%;
+  }
   .action-buttons {
     flex-direction: column;
     width: 100%;
+    gap: 8px;
   }
-  .action-buttons .btn, 
-  .action-buttons .btn-secondary, 
-  .action-buttons .btn-primary, 
-  .action-buttons .btn-ghost {
-    width: 100%;
-    justify-content: center;
+  .action-buttons > * {
+    width: 100% !important;
   }
-  /* For the specialized call-message-complete row */
   .flex-row.gap-sm.w-full {
      flex-direction: column;
      gap: 8px;
   }
-  .flex-row.gap-sm.w-full > * {
-     width: 100% !important;
-     justify-content: center !important;
+  /* Status message text scaling */
+  .booking-footer div {
+    font-size: 0.82rem;
+    line-height: 1.2;
+    word-break: break-all;
+  }
+}
+
+@media (max-width: 400px) {
+  .dashboard-header h2 {
+    font-size: 1.2rem;
+  }
+  .stat-card h3 {
+    font-size: 1.2rem;
+  }
+  .profile-info h3 {
+    font-size: 0.9rem;
   }
 }
 
