@@ -37,7 +37,7 @@ const Dashboard = () => {
     fetchData();
 
     // Socket.io initialization (Connect once on mount)
-    const socket = io('');
+    const socket = io('https://swiftly-g3fg.onrender.com');
     
     if (storedUser.id || storedUser._id) {
       socketRef.current = socket;
