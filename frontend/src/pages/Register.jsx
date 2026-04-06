@@ -72,7 +72,11 @@ const Register = () => {
       setOtpStep(true);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Failed to register');
+      if (err.response?.status === 500 && err.response?.data?.detail) {
+         setError(`Critical Server Error: ${err.response.data.detail}`);
+      } else {
+         setError(err.response?.data?.message || 'Failed to register');
+      }
     } finally {
       setLoading(false);
     }
