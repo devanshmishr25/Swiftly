@@ -149,8 +149,8 @@ const AdminDashboard = () => {
         </div>
         <div className="chart-wrapper glass-panel">
            <h4 className="mb-md text-center">Booking Logistics</h4>
-           <div style={{ flex: 1, width: '100%', height: '100%', minHeight: 0 }}>
-             <ResponsiveContainer width="100%" height="100%">
+           <div style={{ width: '100%', minHeight: '280px', flex: 1 }}>
+             <ResponsiveContainer width="100%" aspect={1.6}>
                <BarChart data={bookingDistData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                  <CartesianGrid strokeDasharray="3 3" opacity={0.05} vertical={false} />
                  <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
