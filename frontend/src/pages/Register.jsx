@@ -66,7 +66,7 @@ const Register = () => {
     setError('');
     setLoading(true);
     try {
-      const payload = { name, email, password, role, phone, location, category };
+      const payload = { name, password, role, phone, location, category };
       const response = await axios.post('/api/auth/register', payload);
       setUserId(response.data.userId);
       setOtpStep(true);
