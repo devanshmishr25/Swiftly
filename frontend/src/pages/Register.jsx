@@ -22,16 +22,32 @@ const Register = () => {
   const navigate = useNavigate();
   const locationSearch = useLocation();
 
+  // Handle initial params and cleanup
   useEffect(() => {
     const params = new URLSearchParams(locationSearch.search);
     const roleParam = params.get('role');
     if (roleParam === 'provider' || roleParam === 'customer') {
       setRole(roleParam);
     }
+    
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = null;
+        } catch (e) { /* already clear */ }
+      }
+    };
   }, [locationSearch]);
 
   const setupRecaptcha = () => {
-    if (window.recaptchaVerifier) return;
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      } catch (e) { /* already clear */ }
+    }
+    
     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
       'size': 'invisible',
       'callback': (response) => { console.log("Recaptcha verified"); }
