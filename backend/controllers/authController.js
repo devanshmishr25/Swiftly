@@ -82,7 +82,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid phone number or password' });
     }
 
-    if (!user.isVerified) {
+    if (user.isVerified === false) {
       return res.status(401).json({ 
         message: 'Mobile number not verified! Please complete verification via the OTP sent at registration.',
         userId: user.id 
