@@ -17,6 +17,8 @@ const Register = () => {
   const [userId, setUserId] = useState(null);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const locationSearch = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(locationSearch.search);
