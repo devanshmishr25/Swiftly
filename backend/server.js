@@ -1,3 +1,4 @@
+// Force Deploy Timestamp: 2026-04-06T10:43:00Z
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +11,9 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Health Check for Deployment Verification
+app.get('/api/auth/health', (req, res) => res.json({ version: '1.0.1', isPhoneOnly: true }));
 
 const server = http.createServer(app);
 const io = socketUtils.init(server);
