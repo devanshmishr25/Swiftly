@@ -147,11 +147,11 @@ const AdminDashboard = () => {
  
            </div>
         </div>
-        <div className="chart-wrapper glass-panel">
+        <div className="chart-wrapper glass-panel" style={{ padding: '2rem 1rem' }}>
            <h4 className="mb-md text-center">Booking Logistics</h4>
-           <div style={{ width: '100%', minHeight: '280px', flex: 1 }}>
-             <ResponsiveContainer width="100%" aspect={1.6}>
-               <BarChart data={bookingDistData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+           <div style={{ width: '100%', minHeight: '300px', flex: 1 }}>
+             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+               <BarChart data={bookingDistData} margin={{ top: 10, right: 10, left: -25, bottom: 5 }}>
                  <CartesianGrid strokeDasharray="3 3" opacity={0.05} vertical={false} />
                  <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
                  <YAxis stroke="var(--text-secondary)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
