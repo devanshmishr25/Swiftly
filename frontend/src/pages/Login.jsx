@@ -9,11 +9,13 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     const body = { phone: identifier.trim(), password };
       
     try {
@@ -97,8 +99,8 @@ const Login = () => {
             <Link to="/forgot-password" title="Recover your account" className="forgot-link" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>Forgot password?</Link>
           </div>
 
-          <button type="submit" className="btn btn-primary w-full">
-            Sign In <ArrowRight size={18} />
+          <button type="submit" disabled={loading} className="btn btn-primary w-full" style={{ marginTop: '1rem' }}>
+            {loading ? 'Logging in...' : 'Sign In'} <ArrowRight size={18} />
           </button>
         </form>
 
