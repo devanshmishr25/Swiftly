@@ -329,8 +329,8 @@ const Dashboard = () => {
                         )}
                         {user.role === 'customer' && booking.status === 'pending' && (
                           <div className="flex-row gap-sm w-full">
-                            <button onClick={() => handleStatusUpdate(booking._id, 'cancelled')} className="btn btn-ghost text-error flex-1">
-                              Cancel Booking
+                            <button onClick={() => handleStatusUpdate(booking._id, 'cancelled')} className="btn btn-ghost text-error flex-1" style={{ fontSize: '0.85rem' }}>
+                              Cancel Request
                             </button>
                             <a 
                               href={`tel:${booking.provider?.phone}`} 

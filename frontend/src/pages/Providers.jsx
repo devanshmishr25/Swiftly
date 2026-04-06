@@ -3,7 +3,8 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import {
   Star, MapPin, ArrowLeft, Wrench, Zap, Trash2, Truck,
   BookOpen, Hammer, Scissors, PaintBucket, Thermometer, Box,
-  PhoneCall, BadgeCheck, Clock, X, Users, ArrowRight, Filter
+  PhoneCall, BadgeCheck, Clock, X, Users, ArrowRight, Filter,
+  Calendar, MessageSquare
 } from 'lucide-react';
 import axios from 'axios';
 import './Providers.css';
@@ -64,13 +65,25 @@ const ProviderCard = ({ provider, category, onBook, delay }) => {
       
       <div className="card-divider" />
       
-      <div className="card-actions">
+      <div className="card-actions-unified">
+        <div className="card-contact-row mb-sm">
+           <a href={`tel:${provider.provider?.phone}`} className="btn-contact-action" title="Call Now">
+              <PhoneCall size={18} /> Call
+           </a>
+           <button 
+             className="btn-contact-action" 
+             onClick={() => window.location.href=`/dashboard?item=${provider._id}&action=chat`}
+             title="Chat with expert"
+           >
+              <MessageSquare size={18} style={{ color: 'var(--accent-primary)' }} /> Message
+           </button>
+        </div>
         <button
-          className="btn btn-primary book-btn w-full"
-          style={{ background: `linear-gradient(135deg, ${color}, ${color}99)` }}
+          className="btn btn-primary book-btn w-full flex-center gap-xs"
+          style={{ background: `linear-gradient(135deg, ${color}, ${color}CC)`, padding: '0.9rem' }}
           onClick={() => onBook(provider)}
         >
-          Book Professional Now
+          <Calendar size={18} /> Get Expert Help Now
         </button>
       </div>
     </div>
