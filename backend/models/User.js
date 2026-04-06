@@ -35,6 +35,18 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true // Customers and Admin auto-approved
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  phoneOTP: {
+    type: String,
+    default: null
+  },
+  phoneOTPExpires: {
+    type: Date,
+    default: null
+  },
   resetPasswordOTP: {
     type: String,
     default: null

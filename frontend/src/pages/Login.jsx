@@ -32,6 +32,11 @@ const Login = () => {
       }
     } catch (err) {
       console.error(err);
+      if (err.response?.status === 401 && err.response?.data?.userId) {
+        // Redirect to registration with userId to finish verification
+        navigate(`/register?userId=${err.response.data.userId}&step=verify`);
+        return;
+      }
       setError(err.response?.data?.message || 'Failed to login');
     }
   };

@@ -21,6 +21,9 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Generate 6-digit OTP for Phone Verification
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     user = new User({
       name,
       email,
@@ -29,10 +32,16 @@ exports.register = async (req, res) => {
       phone,
       location: location || "Not provided",
       category: role === 'provider' ? category : "",
-      isApproved: role === 'provider' ? false : true
+      isApproved: role === 'provider' ? false : true,
+      isVerified: false, 
+      phoneOTP: otp,
+      phoneOTPExpires: Date.now() + 30 * 60 * 1000 // 30 mins
     });
 
     await user.save();
+
+    // MOCK SMS LOG (FREE)
+    console.log(`[SWIFTLY FREE SMS VERIFY] Registration OTP for ${phone}: ${otp}`);
 
     // Automatically generate the associated Service Document for Providers
     if (user.role === 'provider') {
@@ -41,15 +50,15 @@ exports.register = async (req, res) => {
         description: `Professional ${category} services delivered efficiently to your doorstep.`,
         category: category,
         provider: user._id,
-        price: 0 // Price removed
+        price: 0
       });
       await newService.save();
     }
 
-    const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    res.status(201).json({ token, user: { id: user.id, name, email, role: user.role, isApproved: user.isApproved } });
+    res.status(201).json({ 
+       message: 'Account created! Please verify your mobile phone using the OTP.',
+       userId: user.id
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -69,6 +78,13 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    if (!user.isVerified) {
+      return res.status(401).json({ 
+        message: 'Mobile number not verified! Please complete verification via the OTP sent at registration.',
+        userId: user.id 
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -192,6 +208,38 @@ exports.resetByOTP = async (req, res) => {
     await user.save();
 
     res.json({ message: 'Password reset successfully. You can now login.' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// @desc    Verify Registration OTP
+// @route   POST /api/auth/verify-registration
+exports.verifyRegistration = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+    if (!userId || !otp) return res.status(400).json({ message: 'User ID and OTP required' });
+
+    const user = await User.findOne({ 
+      _id: userId,
+      phoneOTP: otp,
+      phoneOTPExpires: { $gt: Date.now() }
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired OTP' });
+
+    // Mark as verified
+    user.isVerified = true;
+    user.phoneOTP = null;
+    user.phoneOTPExpires = null;
+    await user.save();
+
+    // Now generate login token
+    const payload = { user: { id: user.id } };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved, isVerified: user.isVerified } });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
