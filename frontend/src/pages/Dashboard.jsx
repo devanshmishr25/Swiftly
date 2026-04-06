@@ -310,19 +310,37 @@ const Dashboard = () => {
                     <div className="booking-footer" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
                       <div className="action-buttons w-full">
                         {user.role === 'provider' && booking.status === 'pending' && (
-                          <div className="flex-row gap-md w-full">
+                          <div className="flex-row gap-sm w-full">
                             <button onClick={() => handleStatusUpdate(booking._id, 'accepted')} className="btn btn-success flex-1" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
                               <CheckCircle size={16} /> Accept
                             </button>
                             <button onClick={() => handleStatusUpdate(booking._id, 'cancelled')} className="btn btn-error flex-1" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
                               <XCircle size={16} /> Reject
                             </button>
+                            <a 
+                              href={`tel:${booking.customer?.phone}`} 
+                              className="btn btn-ghost"
+                              style={{ width: '44px', height: '44px', padding: 0, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)' }}
+                              title="Call Customer"
+                            >
+                              <Phone size={20} />
+                            </a>
                           </div>
                         )}
                         {user.role === 'customer' && booking.status === 'pending' && (
-                          <button onClick={() => handleStatusUpdate(booking._id, 'cancelled')} className="btn btn-ghost text-error w-full">
-                            Cancel Booking
-                          </button>
+                          <div className="flex-row gap-sm w-full">
+                            <button onClick={() => handleStatusUpdate(booking._id, 'cancelled')} className="btn btn-ghost text-error flex-1">
+                              Cancel Booking
+                            </button>
+                            <a 
+                              href={`tel:${booking.provider?.phone}`} 
+                              className="btn btn-ghost"
+                              style={{ width: '44px', height: '44px', padding: 0, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)' }}
+                              title="Call Provider"
+                            >
+                              <Phone size={20} />
+                            </a>
+                          </div>
                         )}
                         {booking.status === 'accepted' && (
                           <div className="w-full flex-column gap-sm">
