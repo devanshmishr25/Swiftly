@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Lock, Eye, EyeOff, ArrowRight, Phone } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Phone } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
 const Register = () => {
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('+91 ');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('customer');
@@ -21,25 +22,26 @@ const Register = () => {
     setError('');
     setLoading(true);
     
-    // Clean phone number (remove spaces for backend searchability)
+    // Clean phone number
     const cleanPhone = phone.replace(/\s+/g, '');
 
     try {
       const payload = { 
         name, 
+        email, 
         phone: cleanPhone, 
         password, 
         role, 
         category: role === 'provider' ? category : "",
-        isAutoVerified: true // Automatically verify all signups for now
+        isAutoVerified: true // Keep verification easy
       };
       
       await axios.post('/api/auth/register', payload);
-      alert('Account created successfully! You can now login.');
+      alert('Registration successful! You can now login.');
       navigate('/login');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Failed to create account. Try a different phone number.');
+      setError(err.response?.data?.message || 'Failed to create account. Try a different email or phone number.');
     } finally {
       setLoading(false);
     }
@@ -77,6 +79,21 @@ const Register = () => {
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Email Address</label>
+            <div className="input-wrapper">
+              <Mail className="input-icon" size={20} />
+              <input 
+                type="email" 
+                className="input-field with-icon" 
+                placeholder="email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required 
               />
             </div>

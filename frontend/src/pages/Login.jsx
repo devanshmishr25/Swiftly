@@ -1,33 +1,28 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Phone, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState('+91 ');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
-    // Auto-fill admin for testing if clicking the Quick Button
-    const phoneToSubmit = identifier.trim();
       
     try {
-      const response = await axios.post('/api/auth/login', { phone: phoneToSubmit, password });
+      const response = await axios.post('/api/auth/login', { identifier, password });
       
       localStorage.setItem('swiftly_token', response.data.token);
       localStorage.setItem('swiftly_user', JSON.stringify(response.data.user));
       
-      // Clear all state and hard refresh to dashboard/admin
       if (response.data.user?.role === 'admin') {
         window.location.href = '/admin';
       } else {
@@ -35,46 +30,33 @@ const Login = () => {
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      setError(err.response?.data?.message || 'Invalid email/phone or password. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const loginAsAdmin = () => {
-    setIdentifier('+91 00000 00000');
-    setPassword('Admin@123');
-    setIsAdminMode(true);
   };
 
   return (
     <div className="auth-page">
       <div className="auth-container glass-panel animate-fade-in-scale">
         <div className="auth-header">
-          <div className="flex-center mb-md">
-            {isAdminMode ? <ShieldCheck size={48} className="text-primary" /> : <Phone size={48} className="text-accent" />}
-          </div>
-          <h2>{isAdminMode ? 'Super Admin Login' : 'Welcome Back'}</h2>
-          <p className="text-secondary">{isAdminMode ? 'Official System Access' : 'Sign in with your mobile number'}</p>
+          <h2>Welcome Back</h2>
+          <p className="text-secondary">Sign in with your email or mobile number</p>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">
           {error && <div className="error-message" style={{ color: 'var(--error-color)', marginBottom: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>{error}</div>}
           
           <div className="input-group">
-            <label className="input-label">Phone Number</label>
+            <label className="input-label">Email or Mobile Number</label>
             <div className="input-wrapper">
-              <Phone className="input-icon" size={20} />
+              <Mail className="input-icon" size={20} />
               <input 
                 type="text" 
                 className="input-field with-icon" 
-                placeholder="+91 00000 00000"
+                placeholder="email@example.com or mobile"
                 value={identifier}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val.startsWith('+91 ')) setIdentifier(val);
-                  else if (val === '' || val.length < 4) setIdentifier('+91 ');
-                }}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required 
               />
             </div>
@@ -102,24 +84,13 @@ const Login = () => {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className={`btn w-full ${isAdminMode ? 'btn-secondary' : 'btn-primary'}`} style={{ marginTop: '1rem' }}>
-            {loading ? 'Authenticating...' : isAdminMode ? 'Enter Admin Panel' : 'Sign In'} <ArrowRight size={18} />
+          <button type="submit" disabled={loading} className="btn btn-primary w-full" style={{ marginTop: '1rem' }}>
+            {loading ? 'Authenticating...' : 'Sign In Now'} <ArrowRight size={18} />
           </button>
         </form>
 
-        <div className="auth-footer" style={{ borderTop: '1px solid var(--border-color)', marginTop: '1.5rem', paddingTop: '1.5rem' }}>
-          {!isAdminMode ? (
-            <>
-              <button onClick={loginAsAdmin} className="text-secondary text-sm" style={{ border: 'none', background: 'none', cursor: 'pointer', marginBottom: '1rem' }}>
-                <ShieldCheck size={14} /> Secret Admin Login
-              </button>
-              <p>Don't have an account? <Link to="/register" className="text-primary link">Create Account</Link></p>
-            </>
-          ) : (
-            <button onClick={() => setIsAdminMode(false)} className="text-primary text-sm" style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
-               Back to Customer Login
-            </button>
-          )}
+        <div className="auth-footer">
+          <p>Don't have an account? <Link to="/register" className="text-primary link">Create Account</Link></p>
         </div>
       </div>
     </div>

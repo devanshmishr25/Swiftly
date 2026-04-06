@@ -80,35 +80,29 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    let { phone, password } = req.body;
-    phone = sanitizePhone(phone);
+    const { identifier, password } = req.body;
 
-    if (!phone || !password) {
-      return res.status(400).json({ message: 'Phone and password are required' });
+    if (!identifier || !password) {
+      return res.status(400).json({ message: 'Email/Phone and password are required' });
     }
 
+    // Search by email OR phone
+    const cleanPhone = identifier.replace(/\s+/g, '');
     const user = await User.findOne({ 
-       $or: [ { phone: phone }, { phone: req.body.phone } ]
+       $or: [ 
+         { email: identifier.toLowerCase() }, 
+         { phone: cleanPhone },
+         { phone: identifier }
+       ]
     });
 
     if (!user) {
-      return res.status(400).json({ 
-        message: 'Invalid phone number or password',
-        receivedPhone: phone,
-        help: 'Make sure your mobile number is registered.'
-      });
-    }
-
-    if (user.isVerified === false) {
-      return res.status(401).json({ 
-        message: 'Mobile number not verified! Please complete verification.',
-        userId: user.id 
-      });
+      return res.status(400).json({ message: 'Invalid credentials. User not found.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid phone number or password' });
+      return res.status(400).json({ message: 'Invalid credentials. Password incorrect.' });
     }
 
     const payload = { user: { id: user.id } };
