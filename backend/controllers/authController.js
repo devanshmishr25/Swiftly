@@ -83,9 +83,16 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Phone and password are required' });
     }
 
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ 
+       $or: [ { phone: phone }, { phone: req.body.phone } ]
+    });
+
     if (!user) {
-      return res.status(400).json({ message: 'Invalid phone number or password' });
+      return res.status(400).json({ 
+        message: 'Invalid phone number or password',
+        receivedPhone: phone,
+        help: 'Make sure your mobile number is registered.'
+      });
     }
 
     if (user.isVerified === false) {
