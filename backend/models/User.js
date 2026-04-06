@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema({
   isApproved: {
     type: Boolean,
     default: true // Customers and Admin auto-approved
+  },
+  resetPasswordOTP: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 

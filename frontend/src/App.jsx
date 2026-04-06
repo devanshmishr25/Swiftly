@@ -15,6 +15,7 @@ const Providers = lazy(() => import('./pages/Providers'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const NewJoinings = lazy(() => import('./pages/NewJoinings'))
 const ProviderReview = lazy(() => import('./pages/ProviderReview'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 
 function App() {
   const userData = localStorage.getItem('swiftly_user');
@@ -41,6 +42,7 @@ function App() {
             <Route path="/admin/review/:id" element={<ProviderReview />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Routes>
         </Suspense>
       </main>

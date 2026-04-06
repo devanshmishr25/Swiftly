@@ -81,7 +81,7 @@ const Login = () => {
               <input type="checkbox" />
               <span>Remember me</span>
             </label>
-            <a href="#" className="forgot-link">Forgot password?</a>
+            <Link to="/forgot-password" title="Recover your account" className="forgot-link" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>Forgot password?</Link>
           </div>
 
           <button type="submit" className="btn btn-primary w-full">

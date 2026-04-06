@@ -138,3 +138,62 @@ exports.updateProfile = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+// @desc    Request Password Reset OTP
+// @route   POST /api/auth/request-otp
+exports.requestOTP = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ message: 'Phone number is required' });
+
+    const user = await User.findOne({ phone });
+    if (!user) return res.status(404).json({ message: 'User with this phone number not found' });
+
+    // Generate 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordOTP = otp;
+    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
+    await user.save();
+
+    // MOCK SMS SERVICE (LOG TO CONSOLE - FREE)
+    console.log(`[SWIFTLY FREE SMS MOCK] OTP for Reset to ${phone}: ${otp}`);
+    
+    // In a real app, you would call an SMS API here like Fast2SMS, Twilio, etc.
+    // For now, we simulate success.
+    res.json({ message: 'OTP sent successfully to your mobile number (Mocked in Console)' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// @desc    Reset Password using OTP
+// @route   POST /api/auth/reset-password
+exports.resetByOTP = async (req, res) => {
+  try {
+    const { phone, otp, newPassword } = req.body;
+    if (!phone || !otp || !newPassword) return res.status(400).json({ message: 'All fields required' });
+
+    const user = await User.findOne({ 
+      phone, 
+      resetPasswordOTP: otp,
+      resetPasswordExpires: { $gt: Date.now() } 
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired OTP' });
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    
+    // Clear OTP fields
+    user.resetPasswordOTP = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully. You can now login.' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
