@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Phone, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Phone, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
@@ -10,21 +10,24 @@ const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const body = { phone: identifier.trim(), password };
+    
+    // Auto-fill admin for testing if clicking the Quick Button
+    const phoneToSubmit = identifier.trim();
       
     try {
-      const response = await axios.post('/api/auth/login', body);
-      console.log('Login success:', response.data);
-      // Store token and user data
+      const response = await axios.post('/api/auth/login', { phone: phoneToSubmit, password });
+      
       localStorage.setItem('swiftly_token', response.data.token);
       localStorage.setItem('swiftly_user', JSON.stringify(response.data.user));
-      // Hard redirect based on role so Navbar updates
+      
+      // Clear all state and hard refresh to dashboard/admin
       if (response.data.user?.role === 'admin') {
         window.location.href = '/admin';
       } else {
@@ -32,27 +35,32 @@ const Login = () => {
       }
     } catch (err) {
       console.error(err);
-      if (err.response?.status === 401 && err.response?.data?.userId) {
-        // Redirect to registration with userId to finish verification
-        navigate(`/register?userId=${err.response.data.userId}&step=verify`);
-        return;
-      }
-      setError(err.response?.data?.message || 'Failed to login');
+      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const loginAsAdmin = () => {
+    setIdentifier('+91 00000 00000');
+    setPassword('Admin@123');
+    setIsAdminMode(true);
   };
 
   return (
     <div className="auth-page">
       <div className="auth-container glass-panel animate-fade-in-scale">
         <div className="auth-header">
-          <h2>Welcome Back</h2>
-          <p className="text-secondary">Sign in with your mobile number</p>
+          <div className="flex-center mb-md">
+            {isAdminMode ? <ShieldCheck size={48} className="text-primary" /> : <Phone size={48} className="text-accent" />}
+          </div>
+          <h2>{isAdminMode ? 'Super Admin Login' : 'Welcome Back'}</h2>
+          <p className="text-secondary">{isAdminMode ? 'Official System Access' : 'Sign in with your mobile number'}</p>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">
-          {error && <div style={{ color: 'var(--error-color)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
+          {error && <div className="error-message" style={{ color: 'var(--error-color)', marginBottom: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>{error}</div>}
+          
           <div className="input-group">
             <label className="input-label">Phone Number</label>
             <div className="input-wrapper">
@@ -64,11 +72,8 @@ const Login = () => {
                 value={identifier}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val.startsWith('+91 ')) {
-                    setIdentifier(val);
-                  } else if (val === '' || val.length < 4) {
-                    setIdentifier('+91 ');
-                  }
+                  if (val.startsWith('+91 ')) setIdentifier(val);
+                  else if (val === '' || val.length < 4) setIdentifier('+91 ');
                 }}
                 required 
               />
@@ -91,30 +96,30 @@ const Login = () => {
                 type="button" 
                 className="input-action-btn"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
 
-          <div className="auth-action-row">
-            <label className="checkbox-label">
-              <input type="checkbox" />
-              <span>Remember me</span>
-            </label>
-            <Link to="/forgot-password" title="Recover your account" className="forgot-link" style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>Forgot password?</Link>
-          </div>
-
-          <button type="submit" disabled={loading} className="btn btn-primary w-full" style={{ marginTop: '1rem' }}>
-            {loading ? 'Logging in...' : 'Sign In'} <ArrowRight size={18} />
+          <button type="submit" disabled={loading} className={`btn w-full ${isAdminMode ? 'btn-secondary' : 'btn-primary'}`} style={{ marginTop: '1rem' }}>
+            {loading ? 'Authenticating...' : isAdminMode ? 'Enter Admin Panel' : 'Sign In'} <ArrowRight size={18} />
           </button>
         </form>
 
-        <div className="auth-footer">
-          <p className="text-secondary">
-            Don't have an account? <Link to="/register" className="text-primary link">Sign up</Link>
-          </p>
+        <div className="auth-footer" style={{ borderTop: '1px solid var(--border-color)', marginTop: '1.5rem', paddingTop: '1.5rem' }}>
+          {!isAdminMode ? (
+            <>
+              <button onClick={loginAsAdmin} className="text-secondary text-sm" style={{ border: 'none', background: 'none', cursor: 'pointer', marginBottom: '1rem' }}>
+                <ShieldCheck size={14} /> Secret Admin Login
+              </button>
+              <p>Don't have an account? <Link to="/register" className="text-primary link">Create Account</Link></p>
+            </>
+          ) : (
+            <button onClick={() => setIsAdminMode(false)} className="text-primary text-sm" style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
+               Back to Customer Login
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -90,19 +90,22 @@ const seedAdmin = async () => {
     
     const adminExists = await User.findOne({ role: 'admin' });
     if (!adminExists) {
+      console.log('--- SEEDING SUPER ADMIN ---');
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('Admin@123', salt);
       
       const admin = new User({
         name: 'Super Admin',
-        phone: '+910000000000', // Sanitized format (no spaces)
+        phone: '+910000000000', 
+        email: 'admin@swiftly.local',
         password: hashedPassword,
         role: 'admin',
         isVerified: true
       });
       await admin.save();
       console.log('✅ Super Admin account seeded successfully!');
-      console.log('Phone: +91 00000 00000 (Use this in UI) | Password: Admin@123');
+    } else {
+      console.log('✅ Admin account already exists.');
     }
   } catch (err) {
     console.warn('Admin Seeding Warning:', err.message);
