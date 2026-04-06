@@ -25,8 +25,12 @@ exports.register = async (req, res) => {
     // Generate 6-digit OTP for Phone Verification
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+    // Use phone as a placeholder for email to satisfy legacy DB unique indexes if they exist
+    const placeholderEmail = `user_${phone.replace(/\s+/g, '')}@swiftly.local`;
+
     user = new User({
       name,
+      email: placeholderEmail, // Placeholder to satisfy DB constraints
       password: hashedPassword,
       role: role || 'customer',
       phone,
@@ -60,8 +64,11 @@ exports.register = async (req, res) => {
        userId: user.id
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('REGISTRATION ERROR:', err.message);
+    if (err.code === 11000) {
+       return res.status(400).json({ message: 'Mobile number or email already in use by another account.' });
+    }
+    res.status(500).json({ message: 'Server error during registration', detail: err.message });
   }
 };
 
