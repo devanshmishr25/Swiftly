@@ -43,22 +43,23 @@
 }
 
 .charts-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(1rem, 3vw, 3rem); 
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  width: 100%;
 }
 
 .chart-wrapper {
-  padding: 3rem; /* Incredible breathing room */
+  padding: 2rem; /* Reduced for better fit */
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 350px;
-  height: 450px; /* Taller charts */
-  background: var(--bg-card); /* Ensure strong card contrast */
+  min-width: 0; /* Allow shrinking below 320px if needed */
+  height: 400px;
+  background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.03);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
 
 .chart-wrapper h4 {
@@ -184,6 +185,14 @@
   }
   .charts-section {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .chart-wrapper {
+    height: 380px;
+    padding: 1.5rem;
+  }
+  .demo-stat-box div:first-child {
+    font-size: 1.8rem !important; /* Shrink large percentages on mobile */
   }
 }
 

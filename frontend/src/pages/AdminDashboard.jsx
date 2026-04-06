@@ -119,45 +119,47 @@ const AdminDashboard = () => {
 
 
 
-      <section className="charts-section mt-xl flex-row gap-lg" style={{flexWrap: 'wrap'}}>
-        <div className="chart-wrapper glass-panel flex-1" style={{minWidth: 0, height: '350px', overflow: 'hidden'}}>
+      <section className="charts-section mt-xl">
+        <div className="chart-wrapper glass-panel">
            <h4 className="mb-md text-center">User Demographics</h4>
-           <div className="demographics-custom-ui" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', gap: '2rem' }}>
+           <div className="demographics-custom-ui" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.5rem' }}>
              
-             <div className="demo-stats" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 1rem' }}>
+             <div className="demo-stats" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', width: '100%', gap: '0.5rem' }}>
                <div className="demo-stat-box" style={{ textAlign: 'center' }}>
-                 <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#10B981' }}>{customerPct}%</div>
-                 <div className="text-secondary" style={{ textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem', marginTop: '0.5rem' }}>Customers</div>
-                 <div className="text-muted" style={{ fontSize: '0.9rem', marginTop: '0.2rem' }}>{stats.users.customer} total</div>
+                 <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#10B981' }}>{customerPct}%</div>
+                 <div className="text-secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.75rem', fontWeight: 600 }}>Customers</div>
+                 <div className="text-muted" style={{ fontSize: '0.8rem' }}>{stats.users.customer} total</div>
                </div>
                
-               <div className="demo-vs" style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 600 }}>VS</div>
-
+               <div className="demo-vs" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 800 }}>VS</div>
+ 
                <div className="demo-stat-box" style={{ textAlign: 'center' }}>
-                 <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#8B5CF6' }}>{providerPct}%</div>
-                 <div className="text-secondary" style={{ textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem', marginTop: '0.5rem' }}>Providers</div>
-                 <div className="text-muted" style={{ fontSize: '0.9rem', marginTop: '0.2rem' }}>{stats.users.provider} total</div>
+                 <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#8B5CF6' }}>{providerPct}%</div>
+                 <div className="text-secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.75rem', fontWeight: 600 }}>Providers</div>
+                 <div className="text-muted" style={{ fontSize: '0.8rem' }}>{stats.users.provider} total</div>
                </div>
              </div>
-
-             <div className="demo-bar-container" style={{ width: '100%', height: '24px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', overflow: 'hidden', boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
-               <div className="demo-bar customer-bar" style={{ width: `${customerPct}%`, backgroundColor: '#10B981', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
-               <div className="demo-bar provider-bar" style={{ width: `${providerPct}%`, backgroundColor: '#8B5CF6', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+ 
+             <div className="demo-bar-container" style={{ width: '100%', minHeight: '16px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', overflow: 'hidden', boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+               <div className="demo-bar customer-bar" style={{ width: `${customerPct}%`, backgroundColor: '#10B981', transition: 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }}></div>
+               <div className="demo-bar provider-bar" style={{ width: `${providerPct}%`, backgroundColor: '#8B5CF6', transition: 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }}></div>
              </div>
-
+ 
            </div>
         </div>
-        <div className="chart-wrapper glass-panel flex-1" style={{minWidth: 0, height: '350px', overflow: 'hidden'}}>
+        <div className="chart-wrapper glass-panel">
            <h4 className="mb-md text-center">Booking Logistics</h4>
-           <ResponsiveContainer width="100%" height="100%">
-             <BarChart data={bookingDistData}>
-               <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-               <XAxis dataKey="name" stroke="var(--text-secondary)" />
-               <YAxis stroke="var(--text-secondary)" allowDecimals={false} />
-               <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: 'var(--bg-card)', border: 'none', borderRadius: '8px'}} />
-               <Bar dataKey="value" fill="var(--accent-primary)" radius={[4,4,0,0]} />
-             </BarChart>
-           </ResponsiveContainer>
+           <div style={{ flex: 1, width: '100%', height: '100%', minHeight: 0 }}>
+             <ResponsiveContainer width="100%" height="100%">
+               <BarChart data={bookingDistData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                 <CartesianGrid strokeDasharray="3 3" opacity={0.05} vertical={false} />
+                 <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
+                 <YAxis stroke="var(--text-secondary)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
+                 <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.04)'}} contentStyle={{backgroundColor: 'var(--bg-card)', border: 'none', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.3)'}} />
+                 <Bar dataKey="value" fill="var(--accent-primary)" radius={[6,6,0,0]} barSize={40} />
+               </BarChart>
+             </ResponsiveContainer>
+           </div>
         </div>
       </section>
 
