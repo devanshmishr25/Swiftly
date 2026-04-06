@@ -5,17 +5,18 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, phone, location, category } = req.body;
-
-    if (!phone) return res.status(400).json({ message: 'Phone number is required' });
+    const { name, phone, password, role, location, category } = req.body;
+    if (!name || !phone || !password) {
+      return res.status(400).json({ message: 'Name, Phone, and Password are required' });
+    }
 
     if (role === 'provider') {
       if (!category) return res.status(400).json({ message: 'Service category is required for providers' });
     }
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ phone });
     if (user) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'User with this phone number already exists' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -26,7 +27,6 @@ exports.register = async (req, res) => {
 
     user = new User({
       name,
-      email,
       password: hashedPassword,
       role: role || 'customer',
       phone,
@@ -67,17 +67,12 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, phone, password } = req.body;
+    const { phone, password } = req.body;
 
-    let user;
-    if (email) {
-      user = await User.findOne({ email });
-    } else if (phone) {
-      user = await User.findOne({ phone });
-    }
+    const user = await User.findOne({ phone });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid phone number or password' });
     }
 
     if (!user.isVerified) {
@@ -89,13 +84,13 @@ exports.login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid phone number or password' });
     }
 
     const payload = { user: { id: user.id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved } });
+    res.json({ token, user: { id: user.id, name: user.name, phone: user.phone, role: user.role, isApproved: user.isApproved } });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');

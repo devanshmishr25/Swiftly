@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Lock, ArrowRight } from 'lucide-react';
+import { Phone, Lock, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
@@ -13,9 +13,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    const body = identifier.includes('@') 
-      ? { email: identifier.trim(), password } 
-      : { phone: identifier.trim(), password };
+    const body = { phone: identifier.trim(), password };
       
     try {
       const response = await axios.post('/api/auth/login', body);
@@ -23,7 +21,6 @@ const Login = () => {
       // Store token and user data
       localStorage.setItem('swiftly_token', response.data.token);
       localStorage.setItem('swiftly_user', JSON.stringify(response.data.user));
-      // Hard redirect to dashboard so Navbar updates
       // Hard redirect based on role so Navbar updates
       if (response.data.user?.role === 'admin') {
         window.location.href = '/admin';
@@ -46,19 +43,19 @@ const Login = () => {
       <div className="auth-container glass-panel animate-fade-in-scale">
         <div className="auth-header">
           <h2>Welcome Back</h2>
-          <p className="text-secondary">Sign in to your Swiftly account</p>
+          <p className="text-secondary">Sign in with your mobile number</p>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">
           {error && <div style={{ color: 'var(--error-color)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
           <div className="input-group">
-            <label className="input-label">Email or Phone Number</label>
+            <label className="input-label">Phone Number</label>
             <div className="input-wrapper">
-              <User className="input-icon" size={20} />
+              <Phone className="input-icon" size={20} />
               <input 
                 type="text" 
                 className="input-field with-icon" 
-                placeholder="you@email.com or +91 00000 00000"
+                placeholder="+91 00000 00000"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required 

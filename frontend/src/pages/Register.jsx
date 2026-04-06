@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, Phone } from 'lucide-react';
+import { User, Lock, ArrowRight, Phone } from 'lucide-react';
 import axios from 'axios';
 import './Auth.css';
 
 const Register = () => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('+91 ');
   const [location, setLocation] = useState('');
@@ -133,21 +132,6 @@ const Register = () => {
                   placeholder="John Doe"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required 
-                />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Email Address</label>
-              <div className="input-wrapper">
-                <Mail className="input-icon" size={20} />
-                <input 
-                  type="email" 
-                  className="input-field with-icon" 
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   required 
                 />
               </div>
