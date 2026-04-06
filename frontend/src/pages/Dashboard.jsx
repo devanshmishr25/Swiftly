@@ -126,16 +126,19 @@ const Dashboard = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
+      // Always sync user data from server to check for approval status changes
+      const userRes = await axios.get('/api/auth/me', config);
+      setUser(userRes.data);
+      localStorage.setItem('swiftly_user', JSON.stringify(userRes.data));
+
       if (activeTab === 'settings') {
-        const res = await axios.get('/api/auth/me', config);
-        setUser(res.data);
-        setEditName(res.data.name);
-        setEditPhone(res.data.phone || '');
-        setEditLocation(res.data.location || '');
-        setEditCategory(res.data.category || '');
+        setEditName(userRes.data.name);
+        setEditPhone(userRes.data.phone || '');
+        setEditLocation(userRes.data.location || '');
+        setEditCategory(userRes.data.category || '');
       } else {
-        const res = await axios.get(`/api/bookings/my?role=${user.role}`, config);
-        setBookings(res.data);
+        const bookingsRes = await axios.get(`/api/bookings/my?role=${userRes.data.role}`, config);
+        setBookings(bookingsRes.data);
       }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -420,9 +423,19 @@ const Dashboard = () => {
         <div className="chat-drawer-overlay" onClick={() => setActiveChat(null)}>
           <div className="chat-drawer" onClick={e => e.stopPropagation()}>
             <header className="chat-header">
-              <div>
-                <h3 className="text-primary" style={{fontSize: '1.1rem'}}>{user.role === 'customer' ? activeChat.provider?.name : activeChat.customer?.name}</h3>
-                <span className="text-secondary" style={{fontSize: '0.8rem'}}>{activeChat.service?.category} Request</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <a 
+                  href={`tel:${user.role === 'customer' ? activeChat.provider?.phone : activeChat.customer?.phone}`} 
+                  className="btn btn-primary" 
+                  style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Call now"
+                >
+                  <Phone size={18} />
+                </a>
+                <div>
+                  <h3 className="text-primary" style={{fontSize: '1.1rem'}}>{user.role === 'customer' ? activeChat.provider?.name : activeChat.customer?.name}</h3>
+                  <span className="text-secondary" style={{fontSize: '0.8rem'}}>{activeChat.service?.category} Request</span>
+                </div>
               </div>
               <button className="btn-ghost" onClick={() => setActiveChat(null)}><X size={20} /></button>
             </header>
