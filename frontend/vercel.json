@@ -3,10 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://swiftly-g3fg.onrender.com/api/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "index.html" }
   ]
 }
