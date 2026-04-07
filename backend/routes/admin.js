@@ -45,6 +45,7 @@ router.get('/users', adminController.getAllUsers);
 router.get('/users/:id', adminController.getUserById);
 router.get('/pending', adminController.getPendingProviders);
 router.put('/approve/:id', adminController.approveProvider);
+router.delete('/reject/:id', adminController.rejectProvider);
 router.delete('/users/:id', adminController.deleteUser);
 router.delete('/users/:id/bookings', adminController.clearUserBookings);
 

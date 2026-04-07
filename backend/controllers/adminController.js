@@ -119,3 +119,23 @@ exports.approveProvider = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+exports.rejectProvider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Delete the rejected provider entirely (frees up phone/email for re-registration)
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (user.role !== 'provider') return res.status(400).json({ message: 'User is not a provider' });
+
+    await Service.deleteMany({ provider: id });
+    await Booking.deleteMany({ $or: [{ customer: id }, { provider: id }] });
+    await Message.deleteMany({ $or: [{ sender: id }, { recipient: id }] });
+    await User.findByIdAndDelete(id);
+
+    res.json({ message: `${user.name}'s application has been rejected and removed.` });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};

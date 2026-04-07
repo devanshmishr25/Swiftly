@@ -38,20 +38,33 @@ const NewJoinings = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.put(`/api/admin/approve/${id}`, {}, config);
       setPendingUsers(pendingUsers.filter(u => u._id !== id));
-      alert(`${name} is now live!`);
+      alert(`✅ ${name} is now live on Swiftly!`);
     } catch (err) {
-      alert('Approval failed: ' + (err.response?.data?.message || err.message));
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        alert('Session expired. Please log in again.');
+        localStorage.clear();
+        window.location.href = '/login';
+      } else {
+        alert('Approval failed: ' + (err.response?.data?.message || err.message));
+      }
     }
   };
 
   const handleReject = async (id, name) => {
-    if (!window.confirm(`Reject and delete ${name}'s application?`)) return;
+    if (!window.confirm(`Reject and remove ${name}'s provider application?`)) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`/api/admin/users/${id}`, config);
+      await axios.delete(`/api/admin/reject/${id}`, config);
       setPendingUsers(pendingUsers.filter(u => u._id !== id));
+      alert(`❌ ${name}'s application has been rejected.`);
     } catch (err) {
-      alert('Rejection failed: ' + (err.response?.data?.message || err.message));
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        alert('Session expired. Please log in again.');
+        localStorage.clear();
+        window.location.href = '/login';
+      } else {
+        alert('Rejection failed: ' + (err.response?.data?.message || err.message));
+      }
     }
   };
 

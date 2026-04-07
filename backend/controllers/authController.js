@@ -11,7 +11,7 @@ const sanitizePhone = (phone) => {
 
 exports.register = async (req, res) => {
   try {
-    let { name, phone, password, role, location, category } = req.body;
+    let { name, email, phone, password, role, location, category } = req.body;
     phone = sanitizePhone(phone);
 
     if (!name || !phone || !password) {
@@ -27,6 +27,15 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'User with this phone number already exists' });
     }
 
+    // Check if email is already taken
+    const cleanEmail = email && email.trim().toLowerCase();
+    if (cleanEmail) {
+      const emailTaken = await User.findOne({ email: cleanEmail });
+      if (emailTaken) {
+        return res.status(400).json({ message: 'An account with this email already exists.' });
+      }
+    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
@@ -34,11 +43,12 @@ exports.register = async (req, res) => {
     const isAutoVerified = req.body.isAutoVerified === true;
     const otp = isAutoVerified ? null : Math.floor(100000 + Math.random() * 900000).toString();
     
-    const placeholderEmail = `user_${phone.replace('+', '')}@swiftly.local`;
+    // Use the real email if provided, otherwise generate a placeholder
+    const finalEmail = cleanEmail || `user_${phone.replace('+', '')}@swiftly.local`;
 
     user = new User({
       name,
-      email: placeholderEmail,
+      email: finalEmail,
       password: hashedPassword,
       role: role || 'customer',
       phone,
