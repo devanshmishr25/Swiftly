@@ -87,17 +87,26 @@ const seedAdmin = async () => {
   try {
     const User = require('./models/User');
     const bcrypt = require('bcryptjs');
-    
+
+    const adminPhone = process.env.ADMIN_PHONE;
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPhone || !adminEmail || !adminPassword) {
+      console.warn('⚠️  Admin env vars (ADMIN_PHONE, ADMIN_EMAIL, ADMIN_PASSWORD) not set. Skipping seed.');
+      return;
+    }
+
     const adminExists = await User.findOne({ role: 'admin' });
     if (!adminExists) {
       console.log('--- SEEDING SUPER ADMIN ---');
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('Admin@123', salt);
-      
+      const hashedPassword = await bcrypt.hash(adminPassword, salt);
+
       const admin = new User({
         name: 'Super Admin',
-        phone: '+910000000000', 
-        email: 'admin@swiftly.local',
+        phone: adminPhone,
+        email: adminEmail,
         password: hashedPassword,
         role: 'admin',
         isVerified: true

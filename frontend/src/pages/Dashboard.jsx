@@ -43,7 +43,9 @@ const Dashboard = () => {
     fetchData();
 
     // Socket.io initialization (Connect once on mount)
-    const socket = io('https://swiftly-g3fg.onrender.com');
+    // Connect to Socket via env variable or fallback to production
+    const socketUrl = import.meta.env.VITE_API_URL || 'https://swiftly-g3fg.onrender.com';
+    const socket = io(socketUrl);
     
     if (storedUser.id || storedUser._id) {
       socketRef.current = socket;

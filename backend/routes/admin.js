@@ -10,16 +10,24 @@ const User = require('../models/User');
 // Deletes ALL admin accounts and creates a fresh Super Admin
 router.post('/reset-superadmin', async (req, res) => {
   try {
+    const adminPhone = process.env.ADMIN_PHONE;
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPhone || !adminEmail || !adminPassword) {
+      return res.status(500).json({ success: false, error: 'Admin env vars not configured on server.' });
+    }
+
     // Delete all existing admin accounts
     await User.deleteMany({ role: 'admin' });
     
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('Admin@123', salt);
+    const hashedPassword = await bcrypt.hash(adminPassword, salt);
     
     const admin = new User({
       name: 'Super Admin',
-      email: 'admin@swiftly.local',
-      phone: '+910000000000',
+      email: adminEmail,
+      phone: adminPhone,
       password: hashedPassword,
       role: 'admin',
       isVerified: true,
@@ -30,8 +38,7 @@ router.post('/reset-superadmin', async (req, res) => {
     await admin.save();
     res.json({ 
       success: true, 
-      message: '✅ Super Admin reset successfully!',
-      credentials: { email: 'admin@swiftly.local', password: 'Admin@123' }
+      message: '✅ Super Admin reset successfully!'
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Swiftly – Platform Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Reset & Tokens ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #05060f;
+      --surface:  #0c0d1e;
+      --card:     rgba(255,255,255,0.04);
+      --border:   rgba(255,255,255,0.08);
+      --p1:       #4f6ef7;
+      --p2:       #7c3aed;
+      --acc:      #06b6d4;
+      --green:    #10b981;
+      --amber:    #f59e0b;
+      --red:      #ef4444;
+      --t1:       #f1f5f9;
+      --t2:       #94a3b8;
+      --t3:       #475569;
+      --r:        16px;
+
+      --grad: linear-gradient(135deg, var(--p1), var(--p2));
+      --grad2: linear-gradient(135deg, var(--acc), var(--p1));
+    }
+
+    html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--t1); }
+
+    /* ── Slide Container ──────────────────────────────── */
+    #deck { width: 100vw; height: 100vh; position: relative; }
+
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 60px 80px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .45s ease, transform .45s ease;
+      transform: translateY(30px);
+      overflow: hidden;
+    }
+    .slide.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+    .slide.exit   { opacity: 0; transform: translateY(-30px); }
+
+    /* ── Decorative blobs ──────────────────────────────── */
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(90px); opacity: .18; pointer-events: none; z-index: 0;
+    }
+    .blob-blue  { background: var(--p1); }
+    .blob-purple{ background: var(--p2); }
+    .blob-cyan  { background: var(--acc); }
+
+    /* ── Navigation ─────────────────────────────────── */
+    #nav {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 16px;
+      background: rgba(12,13,30,.85); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 10px 24px; z-index: 999;
+    }
+    #nav button {
+      background: none; border: none; color: var(--t2); cursor: pointer;
+      font-size: 22px; line-height: 1; padding: 4px 10px;
+      border-radius: 50%; transition: color .2s, background .2s;
+    }
+    #nav button:hover { color: var(--t1); background: var(--card); }
+    #slide-counter { font-size: .85rem; color: var(--t2); font-variant-numeric: tabular-nums; min-width: 48px; text-align: center; }
+
+    /* Dot indicators */
+    #dots { display: flex; gap: 6px; align-items: center; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--t3); transition: background .3s, transform .3s; cursor: pointer; }
+    .dot.active { background: var(--p1); transform: scale(1.5); }
+
+    /* Keyboard hint */
+    #hint {
+      position: fixed; top: 24px; right: 32px;
+      font-size: .72rem; color: var(--t3); letter-spacing: .5px;
+    }
+
+    /* Progress bar */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: var(--grad); border-radius: 0 3px 3px 0;
+      transition: width .4s ease; z-index: 999;
+    }
+
+    /* ── Slide 1 – Title ──────────────────────────────── */
+    .title-slide { text-align: center; }
+    .logo-badge {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 10px 28px 10px 16px;
+      font-size: 1rem; font-weight: 600; color: var(--t2);
+      margin-bottom: 40px; backdrop-filter: blur(10px);
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--grad); display: grid; place-items: center;
+      font-size: 1.2rem;
+    }
+    .mega-title {
+      font-family: 'Sora', sans-serif; font-weight: 800;
+      font-size: clamp(3rem, 7vw, 6rem); line-height: 1.05;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 24px;
+    }
+    .mega-sub { font-size: clamp(1rem, 2vw, 1.4rem); color: var(--t2); max-width: 620px; margin: 0 auto 48px; line-height: 1.6; }
+    .pill-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .pill {
+      padding: 8px 20px; border-radius: 999px; font-size: .85rem; font-weight: 600;
+      border: 1px solid var(--border); background: var(--card); color: var(--t1);
+    }
+    .pill.hi { background: rgba(79,110,247,.15); border-color: rgba(79,110,247,.4); color: #a5b4fc; }
+
+    /* ── Section label ───────────────────────────────────── */
+    .section-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--p1); margin-bottom: 14px; display: block;
+    }
+    .slide-title {
+      font-family: 'Sora', sans-serif; font-weight: 800;
+      font-size: clamp(2rem, 4.5vw, 3.6rem); line-height: 1.1; margin-bottom: 16px;
+    }
+    .slide-sub { color: var(--t2); font-size: clamp(.95rem, 1.5vw, 1.15rem); line-height: 1.65; max-width: 600px; }
+
+    /* ── Cards ───────────────────────────────────────── */
+    .card-grid { display: grid; gap: 20px; width: 100%; }
+    .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 28px 24px; position: relative; overflow: hidden;
+      transition: border-color .3s, transform .3s;
+    }
+    .card:hover { border-color: rgba(79,110,247,.4); transform: translateY(-3px); }
+
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: grid; place-items: center; font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+    .card-title { font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
+    .card-desc  { color: var(--t2); font-size: .88rem; line-height: 1.55; }
+
+    /* ── Two-column layout ───────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; width: 100%; align-items: center; }
+    .two-col.flip { direction: rtl; }
+    .two-col.flip > * { direction: ltr; }
+
+    /* ── Stats ───────────────────────────────────────── */
+    .stat-row { display: flex; gap: 24px; margin-top: 32px; }
+    .stat-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px 24px; text-align: center; flex: 1;
+    }
+    .stat-num { font-size: 2.2rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-lbl { font-size: .78rem; color: var(--t2); font-weight: 600; letter-spacing: .5px; margin-top: 4px; }
+
+    /* ── Tag chips ───────────────────────────────────── */
+    .chip {
+      display: inline-block; padding: 5px 14px; border-radius: 999px; font-size: .8rem; font-weight: 600;
+      background: rgba(79,110,247,.12); color: #a5b4fc; border: 1px solid rgba(79,110,247,.25); margin: 4px;
+    }
+    .chip.green { background: rgba(16,185,129,.12); color: #6ee7b7; border-color: rgba(16,185,129,.25); }
+    .chip.purple{ background: rgba(124,58,237,.15); color: #c4b5fd; border-color: rgba(124,58,237,.3);  }
+    .chip.cyan  { background: rgba(6,182,212,.12); color: #67e8f9; border-color: rgba(6,182,212,.25);   }
+    .chip.amber { background: rgba(245,158,11,.12); color: #fcd34d; border-color: rgba(245,158,11,.25); }
+
+    /* ── Visual mockup ───────────────────────────────── */
+    .mockup {
+      background: rgba(15,16,35,.9); border: 1px solid var(--border); border-radius: 20px;
+      overflow: hidden; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,.5);
+    }
+    .mockup-bar {
+      background: rgba(255,255,255,.04); padding: 12px 20px;
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+    }
+    .dot-r { width: 11px; height: 11px; border-radius: 50%; }
+    .mockup-body { padding: 24px; }
+
+    /* Flow arrows */
+    .flow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 32px; }
+    .flow-step {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px 18px; min-width: 120px; text-align: center;
+    }
+    .flow-step .num {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--grad);
+      display: grid; place-items: center; font-weight: 800; font-size: .9rem;
+    }
+    .flow-arrow { font-size: 1.6rem; color: var(--t3); }
+
+    /* ── Tech stack ─────────────────────────────────── */
+    .tech-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .tech-badge {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 22px; font-weight: 600; font-size: .9rem;
+    }
+    .tech-icon { font-size: 1.5rem; }
+
+    /* ── Role comparison ──────────────────────────────── */
+    .role-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; width: 100%; }
+    .role-card {
+      border-radius: var(--r); padding: 32px 24px; text-align: center; position: relative; overflow: hidden;
+    }
+    .role-card.customer { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2); }
+    .role-card.provider  { background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.2); }
+    .role-card.admin    { background: rgba(79,110,247,.08); border: 1px solid rgba(79,110,247,.2); }
+    .role-emoji { font-size: 2.8rem; margin-bottom: 14px; display: block; }
+    .role-title { font-family: 'Sora'; font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
+    .role-list { list-style: none; text-align: left; display: inline-block; }
+    .role-list li { color: var(--t2); font-size: .85rem; padding: 4px 0; padding-left: 18px; position: relative; }
+    .role-list li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+
+    /* ── Status badges ───────────────────────────────── */
+    .status-b {
+      display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: .78rem; font-weight: 700;
+    }
+    .s-pending   { background: rgba(245,158,11,.15); color: #fbbf24; }
+    .s-accepted  { background: rgba(79,110,247,.15); color: #818cf8; }
+    .s-completed { background: rgba(16,185,129,.15); color: #34d399; }
+    .s-cancelled { background: rgba(239,68,68,.15); color: #f87171; }
+
+    /* ── Thank-you ───────────────────────────────────── */
+    .thankyou-ring {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: var(--grad); display: grid; place-items: center;
+      font-size: 3.5rem; margin-bottom: 32px;
+      box-shadow: 0 0 60px rgba(79,110,247,.5);
+      animation: pulse 2.5s ease infinite;
+    }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 40px rgba(79,110,247,.4)} 50%{box-shadow:0 0 80px rgba(124,58,237,.6)} }
+
+    /* ── Utility ─────────────────────────────────────── */
+    .content { position: relative; z-index: 1; width: 100%; max-width: 1100px; }
+    .mt-sm { margin-top: 14px; }
+    .mt-md { margin-top: 24px; }
+    .mt-lg { margin-top: 36px; }
+    .text-grad { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .text-grad2 { background: var(--grad2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+    /* Mini bar chart for admin */
+    .mini-bar-wrap { display: flex; align-items: flex-end; gap: 12px; height: 120px; }
+    .mini-bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+    .mini-bar {
+      width: 100%; border-radius: 6px 6px 0 0;
+      background: var(--grad); transition: height .8s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mini-bar-lbl { font-size: .7rem; color: var(--t2); font-weight: 600; }
+
+    /* Floating animation */
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .floating { animation: float 4s ease infinite; }
+
+    /* Line connector */
+    .connector { display: flex; align-items: center; color: var(--t3); font-size: 1.4rem; }
+
+    /* Highlight box */
+    .highlight-box {
+      background: rgba(79,110,247,.08); border: 1px solid rgba(79,110,247,.2);
+      border-radius: 12px; padding: 18px 24px; margin-top: 20px;
+    }
+    .highlight-box p { color: var(--t2); font-size: .9rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress-bar" style="width:0%"></div>
+<div id="hint">← → Arrow Keys to Navigate</div>
+
+<div id="deck">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 1: TITLE                                 -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide active" id="s0">
+    <div class="blob blob-blue"  style="width:500px;height:500px;top:-120px;left:-100px;"></div>
+    <div class="blob blob-purple" style="width:400px;height:400px;bottom:-80px;right:-60px;"></div>
+    <div class="content title-slide">
+      <div class="logo-badge">
+        <div class="logo-icon">⚡</div>
+        Built with MERN Stack
+      </div>
+      <h1 class="mega-title">Swiftly</h1>
+      <p class="mega-sub">A full-stack, real-time local service marketplace connecting customers with verified professionals — instantly.</p>
+      <div class="pill-row">
+        <span class="pill hi">MongoDB</span>
+        <span class="pill hi">Express.js</span>
+        <span class="pill hi">React 19</span>
+        <span class="pill hi">Node.js</span>
+        <span class="pill hi">Socket.IO</span>
+        <span class="pill">3 User Roles</span>
+        <span class="pill">Real-Time Chat</span>
+        <span class="pill">JWT Auth</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 2: PROBLEM & SOLUTION                    -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s1">
+    <div class="blob blob-cyan" style="width:350px;height:350px;top:-50px;right:-50px;"></div>
+    <div class="content">
+      <span class="section-label">The Problem</span>
+      <h2 class="slide-title">Finding help <span class="text-grad">locally</span> is broken.</h2>
+      <div class="card-grid cols-3 mt-lg">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(239,68,68,.15)">🔍</div>
+          <div class="card-title">No Central Platform</div>
+          <div class="card-desc">People rely on word-of-mouth, scattered WhatsApp groups, or outdated directories to find plumbers, electricians, tutors.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(245,158,11,.15)">⏳</div>
+          <div class="card-title">Slow & Unreliable</div>
+          <div class="card-desc">No real-time booking, no status tracking, and no messaging channel between customer and provider once a job is booked.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(124,58,237,.15)">🚫</div>
+          <div class="card-title">Zero Verification</div>
+          <div class="card-desc">Anyone can claim to be a professional. Customers have no way to verify a provider's identity or credentials before hiring.</div>
+        </div>
+      </div>
+      <div class="highlight-box mt-md">
+        <p>💡 <strong style="color:var(--t1)">Swiftly solves all three</strong> — with a centralized marketplace, real-time communication via Socket.IO, and a mandatory admin approval workflow for every service provider.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 3: FEATURES OVERVIEW                     -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <div class="blob blob-purple" style="width:400px;height:400px;bottom:-100px;left:-80px;"></div>
+    <div class="content">
+      <span class="section-label">Platform Overview</span>
+      <h2 class="slide-title">Everything in <span class="text-grad">one place</span>.</h2>
+      <div class="card-grid cols-3 mt-lg">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(79,110,247,.15)">🛒</div>
+          <div class="card-title">Service Marketplace</div>
+          <div class="card-desc">10+ service categories including Plumbing, Electrical, Cleaning, Delivery, Tutoring, Beauty, Handyman & more.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(16,185,129,.15)">🔍</div>
+          <div class="card-title">Smart Provider Search</div>
+          <div class="card-desc">Filter providers by category, rating, and location. View full profiles with specialty tags and availability status.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(245,158,11,.15)">📅</div>
+          <div class="card-title">Instant Booking</div>
+          <div class="card-desc">Customers book a provider with a scheduled date, price, and notes. Providers accept or reject in real time.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(6,182,212,.15)">💬</div>
+          <div class="card-title">Real-Time Messaging</div>
+          <div class="card-desc">Built-in Socket.IO chat drawer between customer and provider, tied directly to the active booking.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(239,68,68,.15)">🛡️</div>
+          <div class="card-title">Admin Approval System</div>
+          <div class="card-desc">New providers must pass admin review before going live. Admins can approve, reject, or delete accounts.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(124,58,237,.15)">📊</div>
+          <div class="card-title">Analytics Dashboard</div>
+          <div class="card-desc">Admin sees live stats: total users, bookings by status, user demographics (customers vs providers), via bar charts.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 4: TECH STACK                            -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <div class="blob blob-blue" style="width:450px;height:450px;top:-80px;right:-100px;"></div>
+    <div class="content" style="text-align:center">
+      <span class="section-label">Technology Stack</span>
+      <h2 class="slide-title">Built on the <span class="text-grad">MERN</span> ecosystem.</h2>
+      <div class="tech-row mt-lg">
+        <div class="tech-badge"><span class="tech-icon">🍃</span> MongoDB<br><small style="color:var(--t2);font-weight:400">Database</small></div>
+        <div class="tech-badge"><span class="tech-icon">⚙️</span> Express.js<br><small style="color:var(--t2);font-weight:400">API Server</small></div>
+        <div class="tech-badge"><span class="tech-icon">⚛️</span> React 19<br><small style="color:var(--t2);font-weight:400">Frontend</small></div>
+        <div class="tech-badge"><span class="tech-icon">🟢</span> Node.js<br><small style="color:var(--t2);font-weight:400">Runtime</small></div>
+        <div class="tech-badge"><span class="tech-icon">🔌</span> Socket.IO<br><small style="color:var(--t2);font-weight:400">Real-Time</small></div>
+        <div class="tech-badge"><span class="tech-icon">⚡</span> Vite<br><small style="color:var(--t2);font-weight:400">Build Tool</small></div>
+      </div>
+      <div class="tech-row mt-md">
+        <div class="tech-badge"><span class="tech-icon">🔐</span> JWT + bcryptjs<br><small style="color:var(--t2);font-weight:400">Auth & Security</small></div>
+        <div class="tech-badge"><span class="tech-icon">📡</span> Axios<br><small style="color:var(--t2);font-weight:400">HTTP Client</small></div>
+        <div class="tech-badge"><span class="tech-icon">🛣️</span> React Router v7<br><small style="color:var(--t2);font-weight:400">Routing</small></div>
+        <div class="tech-badge"><span class="tech-icon">📈</span> Recharts<br><small style="color:var(--t2);font-weight:400">Data Viz</small></div>
+        <div class="tech-badge"><span class="tech-icon">🔔</span> react-hot-toast<br><small style="color:var(--t2);font-weight:400">Notifications</small></div>
+      </div>
+      <div class="highlight-box mt-md" style="max-width:620px;margin:24px auto 0">
+        <p>Frontend is lazily-loaded per route using <strong style="color:var(--t1)">React.lazy + Suspense</strong> for optimized performance. Backend uses Mongoose models with full <strong style="color:var(--t1)">role-based access control</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 5: 3 USER ROLES                          -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s4">
+    <div class="blob blob-purple" style="width:380px;height:380px;top:-60px;left:-60px;"></div>
+    <div class="content">
+      <span class="section-label">User Roles</span>
+      <h2 class="slide-title">Three <span class="text-grad">distinct roles</span>, one platform.</h2>
+      <div class="role-grid mt-lg">
+        <div class="role-card customer">
+          <span class="role-emoji">👤</span>
+          <div class="role-title" style="color:#34d399">Customer</div>
+          <ul class="role-list">
+            <li>Browse all 10+ services</li>
+            <li>Filter & view providers</li>
+            <li>Book with date & price</li>
+            <li>Cancel pending bookings</li>
+            <li>Real-time chat with pro</li>
+            <li>Call provider directly</li>
+            <li>View booking history</li>
+          </ul>
+        </div>
+        <div class="role-card provider">
+          <span class="role-emoji">🔧</span>
+          <div class="role-title" style="color:#c4b5fd">Service Provider</div>
+          <ul class="role-list">
+            <li>Admin-approved profile</li>
+            <li>Listed on marketplace</li>
+            <li>Accept / reject jobs</li>
+            <li>Mark job as completed</li>
+            <li>Real-time chat with client</li>
+            <li>Call customer directly</li>
+            <li>Set specialty & location</li>
+          </ul>
+        </div>
+        <div class="role-card admin">
+          <span class="role-emoji">🛡️</span>
+          <div class="role-title" style="color:#a5b4fc">Super Admin</div>
+          <ul class="role-list">
+            <li>Approve / reject providers</li>
+            <li>View all user accounts</li>
+            <li>Delete users & data</li>
+            <li>Clear booking history</li>
+            <li>See booking stats charts</li>
+            <li>User demographics view</li>
+            <li>Seeded via .env securely</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 6: BOOKING WORKFLOW                       -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s5">
+    <div class="blob blob-cyan" style="width:400px;height:400px;bottom:-80px;right:-60px;"></div>
+    <div class="content" style="text-align:center">
+      <span class="section-label">Core Workflow</span>
+      <h2 class="slide-title">From search to <span class="text-grad2">completion</span>.</h2>
+      <p class="slide-sub mt-sm" style="margin:0 auto">Every booking follows a strict lifecycle enforced on both frontend and backend.</p>
+      <div class="flow mt-lg">
+        <div class="flow-step">
+          <div class="num">1</div>
+          <span style="font-weight:700;font-size:.85rem">Browse Services</span>
+          <span style="color:var(--t2);font-size:.78rem">Customer searches by category</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="num">2</div>
+          <span style="font-weight:700;font-size:.85rem">Find Provider</span>
+          <span style="color:var(--t2);font-size:.78rem">Filter by specialty & location</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="num">3</div>
+          <span style="font-weight:700;font-size:.85rem">Book Now</span>
+          <span style="color:var(--t2);font-size:.78rem">Date, price & notes submitted</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="num">4</div>
+          <span style="font-weight:700;font-size:.85rem">Provider Acts</span>
+          <span style="color:var(--t2);font-size:.78rem">Accept or reject request</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="num">5</div>
+          <span style="font-weight:700;font-size:.85rem">Live Chat</span>
+          <span style="color:var(--t2);font-size:.78rem">Socket.IO messaging opens</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="num">6</div>
+          <span style="font-weight:700;font-size:.85rem">Complete</span>
+          <span style="color:var(--t2);font-size:.78rem">Provider marks job done</span>
+        </div>
+      </div>
+      <div class="stat-row mt-lg" style="justify-content:center">
+        <div class="stat-box"><div class="stat-num">4</div><div class="stat-lbl">Booking Statuses</div></div>
+        <div class="stat-box"><div class="stat-num">2</div><div class="stat-lbl">Real-time Events</div></div>
+        <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">Socket Messages</div></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+        <span class="status-b s-pending">Pending</span>
+        <span style="color:var(--t3);font-size:1.2rem">→</span>
+        <span class="status-b s-accepted">Accepted</span>
+        <span style="color:var(--t3);font-size:1.2rem">→</span>
+        <span class="status-b s-completed">Completed</span>
+        <span style="color:var(--t3);font-size:1rem;align-self:center">or</span>
+        <span class="status-b s-cancelled">Cancelled</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 7: AUTH SYSTEM                           -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s6">
+    <div class="blob blob-blue" style="width:350px;height:350px;top:-40px;left:-40px;"></div>
+    <div class="content two-col">
+      <div>
+        <span class="section-label">Authentication</span>
+        <h2 class="slide-title">Secure, <span class="text-grad">role-aware</span> auth system.</h2>
+        <p class="slide-sub mt-sm">JWT tokens, bcryptjs password hashing, OTP-based forgotten password recovery, and self-healing auto-logout on stale tokens.</p>
+        <div class="mt-md" style="display:flex;flex-direction:column;gap:12px">
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:1.5rem">🔏</span>
+              <div>
+                <div class="card-title">Password Hashing</div>
+                <div class="card-desc">All passwords hashed with bcryptjs (salt rounds 10)</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:1.5rem">🎟️</span>
+              <div>
+                <div class="card-title">JWT Token Auth</div>
+                <div class="card-desc">Stored in localStorage, validated on every protected API call</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:1.5rem">🔑</span>
+              <div>
+                <div class="card-title">OTP Password Reset</div>
+                <div class="card-desc">Time-limited OTP system for forgotten password recovery</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px 20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:1.5rem">🚪</span>
+              <div>
+                <div class="card-title">Auto-Logout Guard</div>
+                <div class="card-desc">401 response triggers automatic token cleanup & redirect</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="mockup floating">
+          <div class="mockup-bar">
+            <div class="dot-r" style="background:#ef4444"></div>
+            <div class="dot-r" style="background:#f59e0b"></div>
+            <div class="dot-r" style="background:#10b981"></div>
+            <span style="color:var(--t3);font-size:.8rem;margin-left:8px">swiftly.app / register</span>
+          </div>
+          <div class="mockup-body">
+            <div style="text-align:center;margin-bottom:20px">
+              <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px">Create Account</div>
+              <div style="color:var(--t2);font-size:.8rem">Join the Swiftly ecosystem</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:16px">
+              <div style="flex:1;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:8px;text-align:center;font-size:.82rem;color:#6ee7b7;font-weight:600;cursor:pointer">Customer</div>
+              <div style="flex:1;background:rgba(124,58,237,.08);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;font-size:.82rem;color:var(--t2);cursor:pointer">Provider</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:.82rem;color:var(--t2)">Full Name</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:.82rem;color:var(--t2)">Phone Number</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:.82rem;color:var(--t2)">Password</div>
+            <div style="background:var(--grad);border-radius:8px;padding:11px;text-align:center;font-size:.88rem;font-weight:700">Create Account →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 8: SERVICES & PROVIDERS                  -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s7">
+    <div class="blob blob-purple" style="width:350px;height:350px;bottom:-60px;right:-60px;"></div>
+    <div class="content two-col flip">
+      <div>
+        <span class="section-label">Marketplace</span>
+        <h2 class="slide-title"><span class="text-grad">10+ services</span>, infinite providers.</h2>
+        <p class="slide-sub mt-sm">Customers browse a rich catalog, filter by category, search by keyword, and view live provider lists per service.</p>
+        <div class="mt-md">
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="chip">🔧 Plumbing</span>
+            <span class="chip purple">⚡ Electrical</span>
+            <span class="chip green">🧹 Cleaning</span>
+            <span class="chip cyan">🚚 Delivery</span>
+            <span class="chip amber">📚 Tutoring</span>
+            <span class="chip">🔨 Handyman</span>
+            <span class="chip purple">✂️ Beauty</span>
+            <span class="chip green">🏠 Home Repair</span>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <p>Clicking any service card opens a <strong style="color:var(--t1)">provider listing modal</strong> that queries the database for approved providers matching that category — customers then pick the best fit and book instantly.</p>
+        </div>
+      </div>
+      <div>
+        <div class="mockup" style="font-size:.82rem">
+          <div class="mockup-bar">
+            <div class="dot-r" style="background:#ef4444"></div>
+            <div class="dot-r" style="background:#f59e0b"></div>
+            <div class="dot-r" style="background:#10b981"></div>
+            <span style="color:var(--t3);font-size:.8rem;margin-left:8px">swiftly.app / services</span>
+          </div>
+          <div class="mockup-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+              <div style="font-size:1.4rem;margin-bottom:8px">🔧</div>
+              <div style="font-weight:700;font-size:.8rem;margin-bottom:4px">Expert Plumbing</div>
+              <div style="color:var(--t2);font-size:.72rem;margin-bottom:10px">Plumbing • Downtown</div>
+              <div style="background:var(--grad);border-radius:6px;padding:6px;text-align:center;font-size:.75rem;font-weight:700">View Providers</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+              <div style="font-size:1.4rem;margin-bottom:8px">⚡</div>
+              <div style="font-weight:700;font-size:.8rem;margin-bottom:4px">Electrician</div>
+              <div style="color:var(--t2);font-size:.72rem;margin-bottom:10px">Electrical • City Center</div>
+              <div style="background:var(--grad);border-radius:6px;padding:6px;text-align:center;font-size:.75rem;font-weight:700">View Providers</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+              <div style="font-size:1.4rem;margin-bottom:8px">🧹</div>
+              <div style="font-weight:700;font-size:.8rem;margin-bottom:4px">Deep Cleaning</div>
+              <div style="color:var(--t2);font-size:.72rem;margin-bottom:10px">Cleaning • West End</div>
+              <div style="background:var(--grad);border-radius:6px;padding:6px;text-align:center;font-size:.75rem;font-weight:700">View Providers</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+              <div style="font-size:1.4rem;margin-bottom:8px">🚚</div>
+              <div style="font-weight:700;font-size:.8rem;margin-bottom:4px">Same-Day Courier</div>
+              <div style="color:var(--t2);font-size:.72rem;margin-bottom:10px">Delivery • City Wide</div>
+              <div style="background:var(--grad);border-radius:6px;padding:6px;text-align:center;font-size:.75rem;font-weight:700">View Providers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 9: REAL-TIME CHAT                        -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s8">
+    <div class="blob blob-cyan" style="width:350px;height:350px;top:-40px;left:-60px;"></div>
+    <div class="content two-col">
+      <div>
+        <span class="section-label">Real-Time Communication</span>
+        <h2 class="slide-title">Live chat via <span class="text-grad2">Socket.IO</span>.</h2>
+        <p class="slide-sub mt-sm">Once a booking is accepted, a persistent chat drawer opens. Both parties can exchange messages in real time — all stored in MongoDB for history.</p>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:1.6rem;flex-shrink:0">📡</span>
+            <div>
+              <div style="font-weight:700;margin-bottom:4px">Bi-directional events</div>
+              <div style="color:var(--t2);font-size:.87rem">send_message and receive_message events via WebSocket rooms</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:1.6rem;flex-shrink:0">🔔</span>
+            <div>
+              <div style="font-weight:700;margin-bottom:4px">Toast notifications</div>
+              <div style="color:var(--t2);font-size:.87rem">Incoming messages trigger react-hot-toast alerts even when chat is closed</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:1.6rem;flex-shrink:0">📜</span>
+            <div>
+              <div style="font-weight:700;margin-bottom:4px">Persisted history</div>
+              <div style="color:var(--t2);font-size:.87rem">Chat history fetched from MongoDB on drawer open, auto-scrolls to latest</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <span style="font-size:1.6rem;flex-shrink:0">📱</span>
+            <div>
+              <div style="font-weight:700;margin-bottom:4px">Direct phone call</div>
+              <div style="color:var(--t2);font-size:.87rem">One-tap tel: link to call the other party directly from the booking card</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="mockup" style="max-width:300px;margin:0 auto">
+          <div class="mockup-bar">
+            <div class="dot-r" style="background:#ef4444"></div>
+            <div class="dot-r" style="background:#f59e0b"></div>
+            <div class="dot-r" style="background:#10b981"></div>
+            <span style="color:var(--t3);font-size:.8rem;margin-left:8px;flex:1">Chat — Alex Johnson</span>
+            <span style="color:var(--t3);font-size:1rem">✕</span>
+          </div>
+          <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;min-height:220px">
+            <div style="background:rgba(79,110,247,.2);border-radius:12px 12px 4px 12px;padding:10px 14px;align-self:flex-end;max-width:80%;font-size:.82rem">Hi! When can you arrive?<span style="display:block;color:var(--t3);font-size:.68rem;margin-top:4px;text-align:right">10:32 AM</span></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:12px 12px 12px 4px;padding:10px 14px;align-self:flex-start;max-width:80%;font-size:.82rem">I'll be there by 11 AM!<span style="display:block;color:var(--t3);font-size:.68rem;margin-top:4px">10:33 AM</span></div>
+            <div style="background:rgba(79,110,247,.2);border-radius:12px 12px 4px 12px;padding:10px 14px;align-self:flex-end;max-width:80%;font-size:.82rem">Great, thanks! 🙏<span style="display:block;color:var(--t3);font-size:.68rem;margin-top:4px;text-align:right">10:34 AM</span></div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-top:1px solid var(--border);padding:12px;display:flex;gap:10px;align-items:center">
+            <div style="flex:1;background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;font-size:.8rem;color:var(--t3)">Type a message...</div>
+            <div style="width:36px;height:36px;background:var(--grad);border-radius:50%;display:grid;place-items:center;font-size:.9rem">➤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 10: ADMIN PANEL                          -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s9">
+    <div class="blob blob-blue" style="width:400px;height:400px;bottom:-80px;left:-60px;"></div>
+    <div class="content two-col flip">
+      <div>
+        <span class="section-label">Super Admin Panel</span>
+        <h2 class="slide-title">Full <span class="text-grad">control</span> of the ecosystem.</h2>
+        <p class="slide-sub mt-sm">The admin dashboard provides a birds-eye view of the entire platform with live stats, user management, and provider approval tools.</p>
+        <div class="stat-row mt-md">
+          <div class="stat-box"><div class="stat-num">4</div><div class="stat-lbl">Stat Cards</div></div>
+          <div class="stat-box"><div class="stat-num">2</div><div class="stat-lbl">Charts</div></div>
+          <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">User Rows</div></div>
+        </div>
+        <div class="highlight-box mt-md">
+          <p>Admin credentials are <strong style="color:var(--t1)">never hardcoded</strong> — seeded securely via environment variables (ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PASSWORD) at server startup.</p>
+        </div>
+      </div>
+      <div>
+        <div class="mockup">
+          <div class="mockup-bar">
+            <div class="dot-r" style="background:#ef4444"></div>
+            <div class="dot-r" style="background:#f59e0b"></div>
+            <div class="dot-r" style="background:#10b981"></div>
+            <span style="color:var(--t3);font-size:.8rem;margin-left:8px">swiftly.app / admin</span>
+          </div>
+          <div class="mockup-body">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">24</div>
+                <div style="font-size:.6rem;color:var(--t2)">Total Users</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:800;color:#c4b5fd">8</div>
+                <div style="font-size:.6rem;color:var(--t2)">Providers</div>
+              </div>
+              <div style="background:var(--card);border:1px solid rgba(79,110,247,.3);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:800;color:#818cf8">47</div>
+                <div style="font-size:.6rem;color:var(--t2)">Bookings</div>
+              </div>
+              <div style="background:rgba(79,110,247,.08);border:1px solid rgba(79,110,247,.3);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:1.4rem;font-weight:800;color:#a5b4fc">3</div>
+                <div style="font-size:.6rem;color:#a5b4fc">Pending</div>
+              </div>
+            </div>
+            <!-- Mini bar chart -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+              <div style="font-size:.72rem;color:var(--t2);margin-bottom:10px;font-weight:600">Booking Logistics</div>
+              <div class="mini-bar-wrap" id="barchart">
+                <div class="mini-bar-col"><div class="mini-bar" style="height:40px"></div><div class="mini-bar-lbl">Pending</div></div>
+                <div class="mini-bar-col"><div class="mini-bar" style="height:90px;background:linear-gradient(135deg,#8b5cf6,#4f6ef7)"></div><div class="mini-bar-lbl">Accepted</div></div>
+                <div class="mini-bar-col"><div class="mini-bar" style="height:70px;background:linear-gradient(135deg,#10b981,#06b6d4)"></div><div class="mini-bar-lbl">Done</div></div>
+                <div class="mini-bar-col"><div class="mini-bar" style="height:25px;background:linear-gradient(135deg,#ef4444,#f59e0b)"></div><div class="mini-bar-lbl">Cancelled</div></div>
+              </div>
+            </div>
+            <!-- User table -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--t3);border-bottom:1px solid var(--border)">
+                <span>Name</span><span>Role</span><span>Actions</span>
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:8px 12px;font-size:.72rem;border-bottom:1px solid var(--border);align-items:center">
+                <span>Riya Sharma</span>
+                <span style="background:rgba(16,185,129,.15);color:#34d399;padding:2px 8px;border-radius:6px;font-size:.65rem;font-weight:700;display:inline-block">customer</span>
+                <span style="color:var(--t3)">🗑 ✕</span>
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:8px 12px;font-size:.72rem;align-items:center">
+                <span>Aryan Mehta</span>
+                <span style="background:rgba(124,58,237,.15);color:#c4b5fd;padding:2px 8px;border-radius:6px;font-size:.65rem;font-weight:700;display:inline-block">provider</span>
+                <span style="color:var(--t3)">🗑 ✕</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 11: DATA MODELS                          -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s10">
+    <div class="blob blob-purple" style="width:350px;height:350px;top:-50px;right:-40px;"></div>
+    <div class="content">
+      <span class="section-label">Database Design</span>
+      <h2 class="slide-title">4 <span class="text-grad">Mongoose</span> models.</h2>
+      <div class="card-grid cols-4 mt-lg">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(16,185,129,.15)">👤</div>
+          <div class="card-title">User</div>
+          <div class="card-desc" style="font-size:.8rem">
+            name, email, phone, password (hashed), role (customer/provider/admin), location, category, isApproved, isVerified, OTP fields · <em>timestamps</em>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(79,110,247,.15)">📅</div>
+          <div class="card-title">Booking</div>
+          <div class="card-desc" style="font-size:.8rem">
+            service (ref), customer (ref), provider (ref), status (pending/accepted/completed/cancelled), scheduledDate, totalPrice, notes · <em>timestamps</em>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(245,158,11,.15)">🛠️</div>
+          <div class="card-title">Service</div>
+          <div class="card-desc" style="font-size:.8rem">
+            title, category, description, provider (ref), price, location, icon · Linked to booking for categorized search
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(6,182,212,.15)">💬</div>
+          <div class="card-title">Message</div>
+          <div class="card-desc" style="font-size:.8rem">
+            sender (ref), recipient (ref), booking (ref), text · Persisted per booking for full chat history retrieval
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box mt-md">
+        <p>All collections use <strong style="color:var(--t1)">Mongoose population</strong> (`.populate()`) to resolve references — bookings include full customer, provider, and service objects for rich dashboard display.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 12: PAGES & ROUTING                      -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s11">
+    <div class="blob blob-cyan" style="width:380px;height:380px;bottom:-60px;left:-40px;"></div>
+    <div class="content" style="text-align:center">
+      <span class="section-label">Frontend Architecture</span>
+      <h2 class="slide-title">11 pages, lazy-loaded, <span class="text-grad">role-guarded</span>.</h2>
+      <div class="card-grid cols-3 mt-lg" style="text-align:left">
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">🏠</span>
+            <span style="font-weight:700;font-size:.9rem">/  — Landing</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Hero, feature cards, role-aware CTA buttons</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">🛒</span>
+            <span style="font-weight:700;font-size:.9rem">/services</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Search + category filter + provider modal</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">👥</span>
+            <span style="font-weight:700;font-size:.9rem">/providers</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Full provider profiles, booking modal, ratings</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">📊</span>
+            <span style="font-weight:700;font-size:.9rem">/dashboard</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Customer & provider bookings, chat, settings</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">🛡️</span>
+            <span style="font-weight:700;font-size:.9rem">/admin</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Stats, charts, user table — admin only</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">🆕</span>
+            <span style="font-weight:700;font-size:.9rem">/admin/joinings</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Pending provider list with approve/reject</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">🔐</span>
+            <span style="font-weight:700;font-size:.9rem">/login & /register</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Role-selectable registration, JWT login</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">🔑</span>
+            <span style="font-weight:700;font-size:.9rem">/forgot-password</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">OTP-based password reset flow</div>
+        </div>
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">ℹ️</span>
+            <span style="font-weight:700;font-size:.9rem">/about</span>
+          </div>
+          <div style="color:var(--t2);font-size:.8rem">Platform info, mission, team section</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 13: API ROUTES                           -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s12">
+    <div class="blob blob-blue" style="width:380px;height:380px;top:-60px;right:-60px;"></div>
+    <div class="content">
+      <span class="section-label">Backend API</span>
+      <h2 class="slide-title">5 <span class="text-grad">route modules</span>, RESTful design.</h2>
+      <div class="card-grid cols-2 mt-lg">
+        <div class="card">
+          <div style="font-family:monospace;font-size:.78rem;font-weight:700;color:var(--acc);margin-bottom:12px">/api/auth</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem">
+            <div><span style="color:var(--green);font-weight:700">POST</span> <span style="color:var(--t2);font-family:monospace">/register</span></div>
+            <div><span style="color:var(--green);font-weight:700">POST</span> <span style="color:var(--t2);font-family:monospace">/login</span></div>
+            <div><span style="color:var(--amber);font-weight:700">GET</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/me</span></div>
+            <div><span style="color:var(--p1);font-weight:700">PUT</span>&nbsp;&nbsp; <span style="color:var(--t2);font-family:monospace">/profile</span></div>
+            <div><span style="color:var(--green);font-weight:700">POST</span> <span style="color:var(--t2);font-family:monospace">/forgot-password / reset</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-family:monospace;font-size:.78rem;font-weight:700;color:var(--acc);margin-bottom:12px">/api/bookings</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem">
+            <div><span style="color:var(--green);font-weight:700">POST</span> <span style="color:var(--t2);font-family:monospace">/  — create booking</span></div>
+            <div><span style="color:var(--amber);font-weight:700">GET</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/my?role=customer|provider</span></div>
+            <div><span style="color:var(--p1);font-weight:700">PUT</span>&nbsp;&nbsp; <span style="color:var(--t2);font-family:monospace">/:id/status</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-family:monospace;font-size:.78rem;font-weight:700;color:var(--acc);margin-bottom:12px">/api/admin</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem">
+            <div><span style="color:var(--amber);font-weight:700">GET</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/stats</span></div>
+            <div><span style="color:var(--amber);font-weight:700">GET</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/users</span></div>
+            <div><span style="color:var(--p1);font-weight:700">PUT</span>&nbsp;&nbsp; <span style="color:var(--t2);font-family:monospace">/users/:id/approve|reject</span></div>
+            <div><span style="color:var(--red);font-weight:700">DEL</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/users/:id</span></div>
+            <div><span style="color:var(--red);font-weight:700">DEL</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/users/:id/bookings</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-family:monospace;font-size:.78rem;font-weight:700;color:var(--acc);margin-bottom:12px">/api/messages + /api/services</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem">
+            <div><span style="color:var(--amber);font-weight:700">GET</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/messages/:bookingId</span></div>
+            <div><span style="color:var(--green);font-weight:700">POST</span> <span style="color:var(--t2);font-family:monospace">/messages</span></div>
+            <div><span style="color:var(--amber);font-weight:700">GET</span>&nbsp; <span style="color:var(--t2);font-family:monospace">/services?category=</span></div>
+            <div><span style="color:var(--green);font-weight:700">POST</span> <span style="color:var(--t2);font-family:monospace">/services  (provider)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 14: SECURITY                             -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s13">
+    <div class="blob blob-purple" style="width:360px;height:360px;bottom:-60px;right:-40px;"></div>
+    <div class="content" style="text-align:center">
+      <span class="section-label">Security & Best Practices</span>
+      <h2 class="slide-title">Built <span class="text-grad">secure</span> from day one.</h2>
+      <div class="card-grid cols-3 mt-lg" style="text-align:left;max-width:960px;margin:32px auto 0">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(16,185,129,.15)">🔒</div>
+          <div class="card-title">No Hardcoded Secrets</div>
+          <div class="card-desc">JWT secret, admin credentials, and MongoDB URI all live in .env — excluded from repository via .gitignore</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(79,110,247,.15)">🛡️</div>
+          <div class="card-title">Role-Based Middleware</div>
+          <div class="card-desc">Every protected route goes through JWT verification + role check middleware before any controller logic runs</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(245,158,11,.15)">🔑</div>
+          <div class="card-title">Bcrypt Hashing</div>
+          <div class="card-desc">All passwords hashed with bcryptjs (10 salt rounds) — plain text is never stored in the database</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(6,182,212,.15)">🚪</div>
+          <div class="card-title">Route Guards</div>
+          <div class="card-desc">Providers are redirected away from customer pages, admin panel requires admin role — enforced both on frontend and backend</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(239,68,68,.15)">🔄</div>
+          <div class="card-title">Auto-Logout on 401</div>
+          <div class="card-desc">When a token expires, the app automatically clears storage and redirects the user to /login — no stale session risk</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(124,58,237,.15)">⏱️</div>
+          <div class="card-title">OTP Expiry</div>
+          <div class="card-desc">Password-reset OTPs have a stored expiry timestamp — expired OTPs are rejected before any password change is allowed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 15: SUMMARY & THANK YOU                  -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s14">
+    <div class="blob blob-blue"   style="width:500px;height:500px;top:-120px;left:-100px;"></div>
+    <div class="blob blob-purple" style="width:400px;height:400px;bottom:-80px;right:-60px;"></div>
+    <div class="content title-slide">
+      <div class="thankyou-ring">⚡</div>
+      <h1 class="mega-title">Thank You!</h1>
+      <p class="mega-sub">Swiftly — A complete, production-ready MERN marketplace for local services with real-time communication, multi-role auth, and a powerful admin system.</p>
+      <div class="stat-row" style="justify-content:center;max-width:680px;margin:0 auto 32px">
+        <div class="stat-box"><div class="stat-num">4</div><div class="stat-lbl">DB Models</div></div>
+        <div class="stat-box"><div class="stat-num">11</div><div class="stat-lbl">Pages</div></div>
+        <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">User Roles</div></div>
+        <div class="stat-box"><div class="stat-num">10+</div><div class="stat-lbl">Services</div></div>
+        <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">Real-Time</div></div>
+      </div>
+      <div class="pill-row">
+        <span class="pill hi">Full-Stack MERN</span>
+        <span class="pill">Real-Time Socket.IO</span>
+        <span class="pill hi">JWT + OTP Auth</span>
+        <span class="pill">Admin Approval Flow</span>
+        <span class="pill hi">Role-Based Access</span>
+        <span class="pill">Analytics Dashboard</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SLIDE 16: TEAM CREDITS                         -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="slide" id="s15">
+    <div class="blob blob-cyan" style="width:600px;height:600px;top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+    <div class="content title-slide">
+      <h1 class="mega-title" style="font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 50px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">Designed and created by</h1>
+      
+      <div style="display:flex; flex-direction: column; gap: 24px; align-items: center; width: 100%;">
+        <div style="font-size: 2.2rem; font-weight: 800; color: #fff; text-shadow: 0 0 25px rgba(6,182,212,0.9); background: rgba(12,13,30,0.6); backdrop-filter: blur(10px); padding: 18px 40px; border-radius: 999px; border: 1px solid rgba(6,182,212,0.4); width: 100%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          Deepak: <span style="color: var(--t1); font-family: monospace; text-shadow: none;">2204850100069</span>
+        </div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: #fff; text-shadow: 0 0 25px rgba(6,182,212,0.9); background: rgba(12,13,30,0.6); backdrop-filter: blur(10px); padding: 18px 40px; border-radius: 999px; border: 1px solid rgba(6,182,212,0.4); width: 100%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          Devansh Mishra: <span style="color: var(--t1); font-family: monospace; text-shadow: none;">2204850100072</span>
+        </div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: #fff; text-shadow: 0 0 25px rgba(6,182,212,0.9); background: rgba(12,13,30,0.6); backdrop-filter: blur(10px); padding: 18px 40px; border-radius: 999px; border: 1px solid rgba(6,182,212,0.4); width: 100%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          Dheeraj Prajapati: <span style="color: var(--t1); font-family: monospace; text-shadow: none;">2204850100069</span>
+        </div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: #fff; text-shadow: 0 0 25px rgba(6,182,212,0.9); background: rgba(12,13,30,0.6); backdrop-filter: blur(10px); padding: 18px 40px; border-radius: 999px; border: 1px solid rgba(6,182,212,0.4); width: 100%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          Manish Kumar Vishwkarma: <span style="color: var(--t1); font-family: monospace; text-shadow: none;">22048501000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#deck -->
+
+<!-- ── Navigation ─────────────────────────────────── -->
+<div id="nav">
+  <button id="btn-prev" title="Previous">‹</button>
+  <div id="dots"></div>
+  <div id="slide-counter">1 / 16</div>
+  <button id="btn-next" title="Next">›</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('slide-counter');
+  const progress = document.getElementById('progress-bar');
+
+  // Build dots
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  }
+
+  function updateDots(idx) {
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    setTimeout(() => {
+      slides[current].classList.remove('exit');
+      current = idx;
+      slides[current].classList.add('active');
+      counter.textContent = (current + 1) + ' / ' + total;
+      updateDots(current);
+      progress.style.width = ((current + 1) / total * 100) + '%';
+    }, 200);
+  }
+
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
+  });
+
+  // Touch/swipe support
+  let startX = 0;
+  document.addEventListener('touchstart', e => startX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) diff > 0 ? goTo(current + 1) : goTo(current - 1);
+  });
+
+  // Init progress bar
+  progress.style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
